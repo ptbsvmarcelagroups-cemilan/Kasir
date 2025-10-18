@@ -3,26 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PT. BSV MARCELA GROUPS – Kasir Online Nanga Pinoh</title>
+<title>Kasir PT. BSV Marcela Groups – Nanga Pinoh</title>
 <style>
-  body{font-family:Segoe UI,Arial,sans-serif;background:#0f172a;color:#e5e7eb;margin:0}
-  header{background:#0ea5e9;color:white;padding:15px;text-align:center;font-weight:bold}
-  .container{max-width:900px;margin:auto;padding:20px}
-  .card{background:#111827;border-radius:10px;padding:20px;margin-top:20px}
-  input,select,button{width:100%;padding:10px;margin:5px 0;border:none;border-radius:6px}
-  input,select{background:#e2e8f0;color:#000}
-  button{background:#38bdf8;color:#000;font-weight:bold;cursor:pointer}
-  button:hover{background:#0ea5e9}
-  table{width:100%;border-collapse:collapse;margin-top:10px}
-  th,td{border-bottom:1px solid #334155;padding:8px;text-align:left}
-  th{background:#1e293b}
-  td.editable:hover{background:#1e3a8a;cursor:pointer}
-  .hapusBtn{background:#ef4444;color:white;padding:4px 8px;border-radius:6px;border:none;cursor:pointer}
-  .hapusBtn:hover{background:#dc2626}
+body{font-family:Segoe UI,Arial,sans-serif;background:#0f172a;color:#e5e7eb;margin:0}
+header{background:#0ea5e9;color:#fff;padding:15px;text-align:center;font-weight:700}
+.container{max-width:900px;margin:auto;padding:20px}
+.card{background:#111827;border-radius:10px;padding:20px;margin-top:20px}
+input,select,button{width:100%;padding:10px;margin:5px 0;border:none;border-radius:6px}
+input,select{background:#e2e8f0;color:#000}
+button{background:#38bdf8;color:#000;font-weight:700;cursor:pointer}
+button:hover{background:#0ea5e9}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border-bottom:1px solid #334155;padding:8px;text-align:left}
+th{background:#1e293b}
+td.editable:hover{background:#1e3a8a;cursor:pointer}
+.hapusBtn{background:#ef4444;color:#fff;padding:4px 8px;border-radius:6px;border:none;cursor:pointer}
+.hapusBtn:hover{background:#dc2626}
 </style>
 </head>
 <body>
-<header>💼 PT. BSV MARCELA GROUPS – Kasir Online Nanga Pinoh</header>
+<header>💼 PT. BSV Marcela Groups – Kasir Online Nanga Pinoh</header>
 
 <div id="login" class="card container">
   <h3>🔐 Login Kasir</h3>
@@ -35,27 +35,22 @@
 <div id="app" class="container" style="display:none">
   <h2 id="welcome"></h2>
 
-  <!-- TRANSAKSI -->
   <div class="card">
     <h3>🛒 Transaksi Penjualan</h3>
     <select id="barang"></select>
     <input type="number" id="qty" value="1" min="1">
     <button onclick="tambah()">Tambah</button>
-
     <table>
       <thead><tr><th>Barang</th><th>Qty</th><th>Harga</th><th>Total</th><th></th></tr></thead>
       <tbody id="keranjang"></tbody>
       <tfoot><tr><th colspan="3">Subtotal</th><th id="subtotal">0</th><th></th></tr></tfoot>
     </table>
-
     <button onclick="simpan()">Simpan & Cetak Nota</button>
   </div>
 
-  <!-- STOK BARANG -->
   <div class="card">
     <h3>📦 Stok Barang</h3>
     <div id="stok"></div>
-
     <h4>Tambah Barang Baru</h4>
     <input id="namaBarang" placeholder="Nama Barang">
     <input id="hargaBarang" type="number" placeholder="Harga">
@@ -63,18 +58,18 @@
     <button onclick="tambahBarang()">Tambah Barang</button>
   </div>
 
-  <!-- LAPORAN -->
   <div class="card">
     <h3>📈 Laporan Transaksi</h3>
     <label>Filter tanggal:</label>
-    <input type="date" id="filterTanggal" onchange="filterLaporan()">
+    <input type="date" id="filterTanggal">
     <label>Filter bulan:</label>
-    <input type="month" id="filterBulan" onchange="filterBulan()">
+    <input type="month" id="filterBulan">
     <button onclick="tampilLaporan()">Tampilkan Semua</button>
+    <button onclick="filterLaporan()">Filter</button>
     <div id="laporan"></div>
   </div>
 
-  <button style="background:#ef4444;color:white" onclick="logout()">Logout</button>
+  <button style="background:#ef4444;color:#fff" onclick="logout()">Logout</button>
 </div>
 
 <footer style="text-align:center;margin:20px;color:#94a3b8">© 2025 PT. BSV Marcela Groups</footer>
@@ -95,31 +90,26 @@ function login(){
     tampilBarang();tampilStok();tampilLaporan();
   }else document.getElementById("msg").innerText="Username atau password salah!";
 }
-function logout(){
-  document.getElementById("login").style.display="block";
-  document.getElementById("app").style.display="none";
-}
+function logout(){location.reload();}
+
 function tampilBarang(){
   const sel=document.getElementById("barang");sel.innerHTML="";
   if(barangList.length===0){
-    const o=document.createElement("option");
-    o.textContent="(Belum ada barang)";
-    sel.appendChild(o);
+    sel.innerHTML="<option>(Belum ada barang)</option>";
   }else{
     barangList.forEach((b,i)=>{
       const o=document.createElement("option");
-      o.value=i;
-      o.textContent=`${b.nama} - Rp${b.harga}`;
+      o.value=i;o.textContent=`${b.nama} – Rp${b.harga}`;
       sel.appendChild(o);
     });
   }
 }
 function tambah(){
+  if(!barangList.length)return alert("Belum ada barang di stok!");
   const i=document.getElementById("barang").value;
   const q=parseInt(document.getElementById("qty").value);
-  if(barangList.length===0)return alert("Belum ada barang di stok!");
   const b=barangList[i];
-  if(b.stok<q){alert("Stok tidak cukup!");return;}
+  if(b.stok<q)return alert("Stok tidak cukup!");
   b.stok-=q;
   keranjang.push({...b,qty:q,total:b.harga*q});
   renderKeranjang();tampilStok();
@@ -134,62 +124,50 @@ function renderKeranjang(){
   document.getElementById("subtotal").innerText=tot;
 }
 function hapus(i){
-  const k=keranjang[i];barangList.find(b=>b.nama===k.nama).stok+=k.qty;
-  keranjang.splice(i,1);renderKeranjang();tampilStok();
+  const k=keranjang[i];
+  barangList.find(b=>b.nama===k.nama).stok+=k.qty;
+  keranjang.splice(i,1);
+  renderKeranjang();tampilStok();
 }
 function simpan(){
   if(!keranjang.length)return alert("Keranjang kosong!");
   const sub=keranjang.reduce((a,b)=>a+b.total,0);
-  const d=new Date(),tgl=d.toLocaleDateString("id-ID"),jam=d.toLocaleTimeString("id-ID");
+  const d=new Date();
+  const tgl=`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+  const jam=d.toLocaleTimeString();
   laporan.push({tgl,jam,sub,items:keranjang});
   localStorage.setItem("bsv_laporan",JSON.stringify(laporan));
   localStorage.setItem("bsv_barang",JSON.stringify(barangList));
-  cetakNota(tgl,jam,sub);keranjang=[];renderKeranjang();tampilLaporan();
-}
-function cetakNota(tgl,jam,sub){
-  let nota=`🧾 PT. BSV Marcela Groups\nTanggal: ${tgl} • Jam: ${jam}\n-----------------\n`;
-  keranjang.forEach(k=>nota+=`${k.nama} x${k.qty} = Rp${k.total}\n`);
-  nota+=`-----------------\nTotal: Rp${sub}\nTerima kasih 🙏`;
-  const w=window.open("","nota","width=380,height=600");
-  w.document.write(`<pre>${nota}</pre>`);w.print();
+  keranjang=[];renderKeranjang();tampilLaporan();alert("Transaksi disimpan!");
 }
 function tampilStok(){
   const d=document.getElementById("stok");
-  if(barangList.length===0){d.innerHTML="<p>Belum ada barang, tambahkan di bawah.</p>";return;}
-  d.innerHTML="<table><tr><th>Nama</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr></table>";
-  const t=d.querySelector("table");
-  barangList.forEach((b,idx)=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${b.nama}</td>
-    <td class='editable' onclick='editHarga(${idx})'>Rp${b.harga}</td>
-    <td class='editable' onclick='editStok(${idx})'>${b.stok}</td>
-    <td><button class='hapusBtn' onclick='hapusBarang(${idx})'>Hapus</button></td>`;
-    t.appendChild(tr);
+  if(!barangList.length){d.innerHTML="<p>Belum ada barang.</p>";return;}
+  let html="<table><tr><th>Nama</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr>";
+  barangList.forEach((b,i)=>{
+    html+=`<tr><td>${b.nama}</td>
+      <td class='editable' onclick='editHarga(${i})'>Rp${b.harga}</td>
+      <td class='editable' onclick='editStok(${i})'>${b.stok}</td>
+      <td><button class='hapusBtn' onclick='hapusBarang(${i})'>Hapus</button></td></tr>`;
   });
+  d.innerHTML=html+"</table>";
 }
 function editHarga(i){
-  const val=prompt("Masukkan harga baru:",barangList[i].harga);
-  if(val===null)return;
-  barangList[i].harga=parseInt(val)||barangList[i].harga;
-  simpanBarang();
+  const v=prompt("Harga baru:",barangList[i].harga);
+  if(v){barangList[i].harga=parseInt(v)||barangList[i].harga;simpanBarang();}
 }
 function editStok(i){
-  const val=prompt("Masukkan stok baru:",barangList[i].stok);
-  if(val===null)return;
-  barangList[i].stok=parseInt(val)||barangList[i].stok;
-  simpanBarang();
+  const v=prompt("Stok baru:",barangList[i].stok);
+  if(v){barangList[i].stok=parseInt(v)||barangList[i].stok;simpanBarang();}
 }
 function hapusBarang(i){
-  if(confirm("Yakin hapus barang ini?")){
-    barangList.splice(i,1);
-    simpanBarang();
-  }
+  if(confirm("Hapus barang ini?")){barangList.splice(i,1);simpanBarang();}
 }
 function tambahBarang(){
   const n=document.getElementById("namaBarang").value.trim();
   const h=parseInt(document.getElementById("hargaBarang").value);
   const s=parseInt(document.getElementById("stokBarang").value);
-  if(!n)return alert("Nama wajib diisi");
+  if(!n)return alert("Nama barang wajib diisi!");
   barangList.push({nama:n,harga:h,stok:s});
   simpanBarang();
   document.getElementById("namaBarang").value="";
@@ -202,33 +180,25 @@ function simpanBarang(){
 }
 function tampilLaporan(data=laporan){
   const d=document.getElementById("laporan");
-  if(data.length===0){d.innerHTML="<p>Belum ada laporan transaksi.</p>";return;}
-  d.innerHTML="<table><tr><th>Tanggal</th><th>Jam</th><th>Total</th></tr></table>";
-  const t=d.querySelector("table");
+  if(!data.length){d.innerHTML="<p>Belum ada laporan.</p>";return;}
+  let html="<table><tr><th>Tanggal</th><th>Jam</th><th>Total</th></tr>";
   data.slice().reverse().forEach(l=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${l.tgl}</td><td>${l.jam}</td><td>Rp${l.sub}</td>`;
-    t.appendChild(tr);
+    html+=`<tr><td>${l.tgl}</td><td>${l.jam}</td><td>Rp${l.sub}</td></tr>`;
   });
+  d.innerHTML=html+"</table>";
 }
 function filterLaporan(){
-  const filter=document.getElementById("filterTanggal").value;
-  if(!filter){tampilLaporan();return;}
-  const data=laporan.filter(l=>{
-    const [dd,mm,yy]=l.tgl.split("/");
-    const format=`${yy.padStart(4,"0")}-${mm.padStart(2,"0")}-${dd.padStart(2,"0")}`;
-    return format===filter;
-  });
-  tampilLaporan(data);
-}
-function filterBulan(){
-  const bulan=document.getElementById("filterBulan").value;
-  if(!bulan){tampilLaporan();return;}
-  const [yy,mm]=bulan.split("-");
-  const data=laporan.filter(l=>{
-    const [dd,bb,tt]=l.tgl.split("/");
-    return tt===yy && bb===mm;
-  });
+  const tgl=document.getElementById("filterTanggal").value;
+  const bln=document.getElementById("filterBulan").value;
+  let data=laporan;
+  if(tgl){
+    const [y,m,d]=tgl.split("-");
+    const format=`${d}/${m}/${y}`;
+    data=data.filter(l=>l.tgl===format);
+  }else if(bln){
+    const [y,m]=bln.split("-");
+    data=data.filter(l=>l.tgl.endsWith(`${m}/${y}`));
+  }
   tampilLaporan(data);
 }
 </script>
