@@ -14,9 +14,11 @@
   button{background:#38bdf8;color:#000;font-weight:bold;cursor:pointer}
   button:hover{background:#0ea5e9}
   table{width:100%;border-collapse:collapse;margin-top:10px}
-  th,td{border-bottom:1px solid #334155;padding:8px}
+  th,td{border-bottom:1px solid #334155;padding:8px;text-align:left}
   th{background:#1e293b}
   td.editable:hover{background:#1e3a8a;cursor:pointer}
+  .hapusBtn{background:#ef4444;color:white;padding:4px 8px;border-radius:6px;border:none;cursor:pointer}
+  .hapusBtn:hover{background:#dc2626}
 </style>
 </head>
 <body>
@@ -33,6 +35,7 @@
 <div id="app" class="container" style="display:none">
   <h2 id="welcome"></h2>
 
+  <!-- TRANSAKSI -->
   <div class="card">
     <h3>🛒 Transaksi Penjualan</h3>
     <select id="barang"></select>
@@ -48,9 +51,11 @@
     <button onclick="simpan()">Simpan & Cetak Nota</button>
   </div>
 
+  <!-- STOK BARANG -->
   <div class="card">
-    <h3>📦 Stok Barang (klik harga/stok untuk ubah)</h3>
+    <h3>📦 Stok Barang</h3>
     <div id="stok"></div>
+
     <h4>Tambah Barang Baru</h4>
     <input id="namaBarang" placeholder="Nama Barang">
     <input id="hargaBarang" type="number" placeholder="Harga">
@@ -58,6 +63,7 @@
     <button onclick="tambahBarang()">Tambah Barang</button>
   </div>
 
+  <!-- LAPORAN -->
   <div class="card">
     <h3>📈 Laporan Harian</h3>
     <div id="laporan"></div>
@@ -70,7 +76,7 @@
 
 <script>
 const users={admin:"admin123",kasir:"kasir123"};
-let barangList=JSON.parse(localStorage.getItem("bsv_barang"))||[]; // kosong
+let barangList=JSON.parse(localStorage.getItem("bsv_barang"))||[];
 let laporan=JSON.parse(localStorage.getItem("bsv_laporan"))||[];
 let keranjang=[];
 
@@ -92,11 +98,13 @@ function tampilBarang(){
   const sel=document.getElementById("barang");sel.innerHTML="";
   if(barangList.length===0){
     const o=document.createElement("option");
-    o.textContent="(Belum ada barang)";sel.appendChild(o);
+    o.textContent="(Belum ada barang)";
+    sel.appendChild(o);
   }else{
     barangList.forEach((b,i)=>{
       const o=document.createElement("option");
-      o.value=i;o.textContent=`${b.nama} - Rp${b.harga}`;
+      o.value=i;
+      o.textContent=`${b.nama} - Rp${b.harga}`;
       sel.appendChild(o);
     });
   }
@@ -143,13 +151,14 @@ function cetakNota(tgl,jam,sub){
 function tampilStok(){
   const d=document.getElementById("stok");
   if(barangList.length===0){d.innerHTML="<p>Belum ada barang, tambahkan di bawah.</p>";return;}
-  d.innerHTML="<table><tr><th>Nama</th><th>Harga</th><th>Stok</th></tr></table>";
+  d.innerHTML="<table><tr><th>Nama</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr></table>";
   const t=d.querySelector("table");
   barangList.forEach((b,idx)=>{
     const tr=document.createElement("tr");
     tr.innerHTML=`<td>${b.nama}</td>
     <td class='editable' onclick='editHarga(${idx})'>Rp${b.harga}</td>
-    <td class='editable' onclick='editStok(${idx})'>${b.stok}</td>`;
+    <td class='editable' onclick='editStok(${idx})'>${b.stok}</td>
+    <td><button class='hapusBtn' onclick='hapusBarang(${idx})'>Hapus</button></td>`;
     t.appendChild(tr);
   });
 }
@@ -157,15 +166,19 @@ function editHarga(i){
   const val=prompt("Masukkan harga baru:",barangList[i].harga);
   if(val===null)return;
   barangList[i].harga=parseInt(val)||barangList[i].harga;
-  localStorage.setItem("bsv_barang",JSON.stringify(barangList));
-  tampilBarang();tampilStok();
+  simpanBarang();
 }
 function editStok(i){
   const val=prompt("Masukkan stok baru:",barangList[i].stok);
   if(val===null)return;
   barangList[i].stok=parseInt(val)||barangList[i].stok;
-  localStorage.setItem("bsv_barang",JSON.stringify(barangList));
-  tampilBarang();tampilStok();
+  simpanBarang();
+}
+function hapusBarang(i){
+  if(confirm("Yakin hapus barang ini?")){
+    barangList.splice(i,1);
+    simpanBarang();
+  }
 }
 function tambahBarang(){
   const n=document.getElementById("namaBarang").value.trim();
@@ -173,10 +186,13 @@ function tambahBarang(){
   const s=parseInt(document.getElementById("stokBarang").value);
   if(!n)return alert("Nama wajib diisi");
   barangList.push({nama:n,harga:h,stok:s});
-  localStorage.setItem("bsv_barang",JSON.stringify(barangList));
+  simpanBarang();
   document.getElementById("namaBarang").value="";
   document.getElementById("hargaBarang").value="";
   document.getElementById("stokBarang").value="";
+}
+function simpanBarang(){
+  localStorage.setItem("bsv_barang",JSON.stringify(barangList));
   tampilBarang();tampilStok();
 }
 function tampilLaporan(){
