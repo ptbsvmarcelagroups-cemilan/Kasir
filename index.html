@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kasir PT. BSV Marcela Groups – v2.0 (Laba Harian)</title>
+<title>Kasir PT. BSV Marcela Groups – v2.1 (Tanggal + Hapus Laporan)</title>
 <style>
   body{font-family:Segoe UI,Arial,sans-serif;background:#0f172a;color:#e5e7eb;margin:0}
   header{background:#0ea5e9;color:#fff;padding:15px;text-align:center;font-weight:700}
@@ -19,13 +19,12 @@
   td.editable:hover{background:#1e3a8a;cursor:pointer}
   .btn-danger{background:#ef4444;color:#fff}
   .btn-danger:hover{background:#dc2626}
+  .right{text-align:right}.center{text-align:center}
   .muted{color:#94a3b8}
-  .right{text-align:right}
-  .center{text-align:center}
 </style>
 </head>
 <body>
-<header>💼 PT. BSV Marcela Groups – Kasir Online Nanga Pinoh (v2.0)</header>
+<header>💼 PT. BSV Marcela Groups – Kasir Online Nanga Pinoh (v2.1)</header>
 
 <!-- LOGIN -->
 <div id="login" class="card container">
@@ -55,6 +54,10 @@
       <tfoot><tr><th colspan="3" class="right">Subtotal</th><th id="subtotal" class="right">0</th><th></th></tr></tfoot>
     </table>
 
+    <!-- Tanggal Transaksi (baru) -->
+    <label class="muted">📅 Tanggal Transaksi</label>
+    <input type="date" id="tglTransaksi">
+
     <button onclick="simpan()">Simpan & Cetak Nota</button>
   </div>
 
@@ -70,9 +73,9 @@
       <input id="hargaJual" type="number" placeholder="Harga Jual">
       <input id="stokBarang" type="number" placeholder="Stok">
       <button onclick="tambahBarang()">Tambah Barang</button>
-      <div class="muted">* Kolom harga beli hanya terlihat untuk ADMIN.</div>
+      <div class="muted">* Harga beli hanya terlihat untuk ADMIN.</div>
     </div>
-    <div id="formKasir" class="muted" style="display:none">Hanya admin yang dapat menambah/ubah harga beli dan barang.</div>
+    <div id="formKasir" class="muted" style="display:none">Hanya ADMIN yang dapat menambah/ubah harga beli & barang.</div>
   </div>
 
   <!-- LAPORAN -->
@@ -83,7 +86,7 @@
       <input type="date" id="filterTanggal">
       <label>Filter bulan:</label>
       <input type="month" id="filterBulan">
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button onclick="tampilLaporan()">Tampilkan Semua</button>
         <button onclick="filterLaporan()">Filter</button>
       </div>
@@ -101,12 +104,14 @@
 /* ========= Data & State ========= */
 const users={admin:"admin123",kasir:"kasir123"};
 let barangList=JSON.parse(localStorage.getItem("bsv_barang"))||[];
-let laporan=JSON.parse(localStorage.getItem("bsv_laporan_v2"))||[]; // v2 simpan laba
+let laporan=JSON.parse(localStorage.getItem("bsv_laporan_v2"))||[]; // simpan total & laba per transaksi
 let keranjang=[];
 let SESSION=null;
 
 const $=id=>document.getElementById(id);
 const fmtID=n=>new Intl.NumberFormat('id-ID').format(n||0);
+const todayISO=()=>{const d=new Date();const y=d.getFullYear(),m=("0"+(d.getMonth()+1)).slice(-2),dd=("0"+d.getDate()).slice(-2);return `${y}-${m}-${dd}`;}
+const toDMY=(iso)=>{const [y,m,d]=iso.split("-");return `${d}/${m}/${y}`}
 
 /* ========= Login ========= */
 function login(){
@@ -124,28 +129,22 @@ function logout(){ location.reload(); }
 
 /* ========= Boot ========= */
 function boot(){
-  // migrasi data lama: pastikan setiap item punya hbeli
-  barangList = (barangList||[]).map(b=>({nama:b.nama,hbeli: b.hbeli??0, harga:b.harga??b.hargaJual??0, stok:b.stok??0}));
+  // pastikan tiap item punya hbeli
+  barangList=(barangList||[]).map(b=>({nama:b.nama,hbeli:b.hbeli??0,harga:b.harga??b.hargaJual??0,stok:b.stok??0}));
   saveBarang();
 
-  // tampil form admin/kasir
-  if(SESSION.role==='admin'){
-    $("formAdmin").style.display="block";
-    $("formKasir").style.display="none";
-  }else{
-    $("formAdmin").style.display="none";
-    $("formKasir").style.display="block";
-  }
+  // tampil form sesuai role
+  if(SESSION.role==='admin'){ $("formAdmin").style.display="block"; $("formKasir").style.display="none"; }
+  else{ $("formAdmin").style.display="none"; $("formKasir").style.display="block"; }
 
-  tampilBarang();
-  tampilStok();
-  tampilLaporan();
+  // inisialisasi tanggal transaksi (default hari ini)
+  $("tglTransaksi").value = todayISO();
+
+  tampilBarang(); tampilStok(); tampilLaporan();
 }
 
 /* ========= Barang & Stok ========= */
-function saveBarang(){
-  localStorage.setItem("bsv_barang",JSON.stringify(barangList));
-}
+function saveBarang(){ localStorage.setItem("bsv_barang",JSON.stringify(barangList)); }
 
 function tampilBarang(){
   const sel=$("barang"); sel.innerHTML="";
@@ -156,193 +155,151 @@ function tampilBarang(){
     sel.appendChild(op);
   });
 }
-
 function tampilStok(){
   const box=$("stok");
   if(!barangList.length){ box.innerHTML="<p>Belum ada barang, tambahkan di bawah.</p>"; return; }
-
-  // header dinamis (tampilkan kolom Harga Beli hanya untuk admin)
   let thead = `<tr>
-      <th>Nama</th>
-      ${SESSION.role==='admin'?'<th class="right">Harga Beli</th>':''}
-      <th class="right">Harga Jual</th>
-      <th class="center">Stok</th>
-      <th>Aksi</th>
-    </tr>`;
+    <th>Nama</th>
+    ${SESSION.role==='admin'?'<th class="right">Harga Beli</th>':''}
+    <th class="right">Harga Jual</th>
+    <th class="center">Stok</th>
+    <th>Aksi</th>
+  </tr>`;
   let rows="";
   barangList.forEach((b,i)=>{
     rows += `<tr>
       <td>${b.nama}</td>
-      ${SESSION.role==='admin'
-        ? `<td class="right editable" onclick="editHbeli(${i})">Rp${fmtID(b.hbeli)}</td>` : ''
-      }
+      ${SESSION.role==='admin'?`<td class="right editable" onclick="editHbeli(${i})">Rp${fmtID(b.hbeli)}</td>`:""}
       <td class="right editable" onclick="editHjual(${i})">Rp${fmtID(b.harga)}</td>
       <td class="center editable" onclick="editStok(${i})">${b.stok}</td>
       <td><button class="btn-danger" onclick="hapusBarang(${i})">Hapus</button></td>
     </tr>`;
   });
-
-  box.innerHTML = `<table><thead>${thead}</thead><tbody>${rows}</tbody></table>`;
+  box.innerHTML=`<table><thead>${thead}</thead><tbody>${rows}</tbody></table>`;
 }
-
-function editHbeli(i){
-  if(SESSION.role!=='admin') return;
-  const v=prompt("Masukkan HARGA BELI (modal) baru:", barangList[i].hbeli||0);
-  if(v===null) return;
-  const x=parseInt(v); if(!isNaN(x)){ barangList[i].hbeli=x; saveBarang(); tampilStok(); }
-}
-function editHjual(i){
-  const v=prompt("Masukkan HARGA JUAL baru:", barangList[i].harga||0);
-  if(v===null) return;
-  const x=parseInt(v); if(!isNaN(x)){ barangList[i].harga=x; saveBarang(); tampilStok(); tampilBarang(); }
-}
-function editStok(i){
-  const v=prompt("Masukkan STOK baru:", barangList[i].stok||0);
-  if(v===null) return;
-  const x=parseInt(v); if(!isNaN(x)){ barangList[i].stok=x; saveBarang(); tampilStok(); tampilBarang(); }
-}
-function hapusBarang(i){
-  if(confirm("Yakin hapus barang ini?")){ barangList.splice(i,1); saveBarang(); tampilStok(); tampilBarang(); }
-}
-
+function editHbeli(i){ if(SESSION.role!=='admin')return; const v=prompt("Harga BELI baru:",barangList[i].hbeli||0); if(v===null)return; const x=parseInt(v); if(!isNaN(x)){ barangList[i].hbeli=x; saveBarang(); tampilStok(); } }
+function editHjual(i){ const v=prompt("Harga JUAL baru:",barangList[i].harga||0); if(v===null)return; const x=parseInt(v); if(!isNaN(x)){ barangList[i].harga=x; saveBarang(); tampilStok(); tampilBarang(); } }
+function editStok(i){ const v=prompt("STOK baru:",barangList[i].stok||0); if(v===null)return; const x=parseInt(v); if(!isNaN(x)){ barangList[i].stok=x; saveBarang(); tampilStok(); tampilBarang(); } }
+function hapusBarang(i){ if(confirm("Hapus barang ini?")){ barangList.splice(i,1); saveBarang(); tampilStok(); tampilBarang(); } }
 function tambahBarang(){
-  if(SESSION.role!=='admin'){ return alert("Hanya ADMIN yang bisa menambah barang."); }
-  const nama = $("namaBarang").value.trim();
-  const hbeli= parseInt($("hargaBeli").value||"0");
-  const hjual= parseInt($("hargaJual").value||"0");
-  const stok = parseInt($("stokBarang").value||"0");
-  if(!nama) return alert("Nama barang wajib diisi.");
-
-  barangList.push({nama, hbeli: isNaN(hbeli)?0:hbeli, harga: isNaN(hjual)?0:hjual, stok: isNaN(stok)?0:stok});
-  saveBarang();
-  $("namaBarang").value=""; $("hargaBeli").value=""; $("hargaJual").value=""; $("stokBarang").value="";
-  tampilBarang(); tampilStok();
+  if(SESSION.role!=='admin') return alert("Hanya ADMIN yang bisa menambah barang.");
+  const nama=$("namaBarang").value.trim();
+  const hbeli=parseInt($("hargaBeli").value||"0");
+  const hjual=parseInt($("hargaJual").value||"0");
+  const stok=parseInt($("stokBarang").value||"0");
+  if(!nama)return alert("Nama barang wajib diisi.");
+  barangList.push({nama,hbeli:isNaN(hbeli)?0:hbeli,harga:isNaN(hjual)?0:hjual,stok:isNaN(stok)?0:stok});
+  saveBarang(); $("namaBarang").value=$("hargaBeli").value=$("hargaJual").value=$("stokBarang").value=""; tampilBarang(); tampilStok();
 }
 
 /* ========= POS ========= */
 function tambah(){
   if(!barangList.length) return alert("Belum ada barang di stok!");
-  const idx = parseInt($("barang").value||"0");
-  const qty = Math.max(1, parseInt($("qty").value||"1"));
-  const b = barangList[idx]; if(!b) return;
-  if(b.stok < qty) return alert("Stok tidak cukup!");
-
-  b.stok -= qty;
-  keranjang.push({ nama:b.nama, hbeli:b.hbeli||0, harga:b.harga||0, qty, total:(b.harga||0)*qty });
+  const idx=parseInt($("barang").value||"0");
+  const qty=Math.max(1, parseInt($("qty").value||"1"));
+  const b=barangList[idx]; if(!b) return;
+  if(b.stok<qty) return alert("Stok tidak cukup!");
+  b.stok-=qty;
+  keranjang.push({nama:b.nama,hbeli:b.hbeli||0,harga:b.harga||0,qty,total:(b.harga||0)*qty});
   renderKeranjang(); tampilStok(); tampilBarang();
 }
 function renderKeranjang(){
   const body=$("keranjang"); body.innerHTML=""; let sub=0;
-  keranjang.forEach((k,i)=>{
-    sub += k.total;
-    const tr=document.createElement("tr");
-    tr.innerHTML = `<td>${k.nama}</td>
-      <td class="center">${k.qty}</td>
-      <td class="right">Rp${fmtID(k.harga)}</td>
-      <td class="right">Rp${fmtID(k.total)}</td>
-      <td><button class="btn-danger" onclick="hapusItem(${i})">x</button></td>`;
-    body.appendChild(tr);
+  keranjang.forEach((k,i)=>{ sub+=k.total;
+    body.innerHTML+=`<tr>
+      <td>${k.nama}</td><td class="center">${k.qty}</td>
+      <td class="right">Rp${fmtID(k.harga)}</td><td class="right">Rp${fmtID(k.total)}</td>
+      <td><button class="btn-danger" onclick="hapusItem(${i})">x</button></td>
+    </tr>`;
   });
-  $("subtotal").innerText = "Rp"+fmtID(sub);
+  $("subtotal").innerText="Rp"+fmtID(sub);
 }
 function hapusItem(i){
-  const row = keranjang[i];
-  const b = barangList.find(x=>x.nama===row.nama);
-  if(b) b.stok += row.qty;
-  keranjang.splice(i,1);
+  const row=keranjang[i]; const b=barangList.find(x=>x.nama===row.nama);
+  if(b) b.stok+=row.qty; keranjang.splice(i,1);
   renderKeranjang(); tampilStok(); tampilBarang();
 }
 
 function simpan(){
-  if(keranjang.length===0) return alert("Keranjang kosong!");
-  const d=new Date();
-  const tgl = `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
-  const jam = d.toLocaleTimeString("id-ID");
+  if(!keranjang.length) return alert("Keranjang kosong!");
+  const iso = $("tglTransaksi").value || todayISO();   // yyyy-mm-dd (dipilih/manual)
+  const tgl = toDMY(iso);                               // dd/mm/yyyy (format penyimpanan)
+  const jam = new Date().toLocaleTimeString("id-ID");
 
   // hitung subtotal & laba transaksi
   let subtotal=0, labaTrans=0;
-  keranjang.forEach(k=>{
-    subtotal += k.total;
-    labaTrans += ( (k.harga||0) - (k.hbeli||0) ) * k.qty;
-  });
+  keranjang.forEach(k=>{ subtotal+=k.total; labaTrans+=((k.harga||0)-(k.hbeli||0))*k.qty; });
 
-  // simpan penjualan (harian direkap nanti)
   laporan.push({ tgl, jam, total: subtotal, laba: labaTrans, items: keranjang });
   localStorage.setItem("bsv_laporan_v2", JSON.stringify(laporan));
   saveBarang();
 
-  // reset keranjang
   keranjang=[]; renderKeranjang();
   alert("Transaksi disimpan!");
-
-  // Nota sederhana
   cetakNota(tgl, jam, subtotal);
-
-  // refresh laporan
   tampilLaporan();
 }
-
 function cetakNota(tgl,jam,total){
-  let nota = `🧾 PT. BSV Marcela Groups\nTanggal: ${tgl} • Jam: ${jam}\n-----------------\n`;
-  nota += "Terima kasih 🙏\n";
-  nota += "Total: Rp" + fmtID(total) + "\n";
   const w=window.open("","nota","width=380,height=600");
-  w.document.write(`<pre>${nota}</pre>`); w.print();
+  w.document.write(`<pre>🧾 PT. BSV Marcela Groups\nTanggal: ${tgl} • Jam: ${jam}\n-----------------\nTotal: Rp${fmtID(total)}\nTerima kasih 🙏</pre>`); w.print();
 }
 
-/* ========= Laporan (Harian & Bulanan) ========= */
+/* ========= Laporan ========= */
 function tampilLaporan(data=laporan){
-  const box = $("laporan");
-  const sumBox = $("ringkas");
-  if(!data.length){ box.innerHTML="<p>Belum ada laporan.</p>"; sumBox.innerHTML=""; return; }
+  const box=$("laporan"), sum=$("ringkas");
+  if(!data.length){ box.innerHTML="<p>Belum ada laporan.</p>"; sum.innerHTML=""; return; }
 
-  // rekap per tanggal (harian)
-  const map = {};
-  data.forEach(r=>{
-    if(!map[r.tgl]) map[r.tgl]={total:0,laba:0};
-    map[r.tgl].total += r.total||r.sub||0;
-    map[r.tgl].laba  += r.laba||0;
-  });
+  // Rekap harian
+  const map={}; data.forEach(r=>{ if(!map[r.tgl]) map[r.tgl]={total:0,laba:0}; map[r.tgl].total+=(r.total||r.sub||0); map[r.tgl].laba+=(r.laba||0); });
 
-  const rows = Object.keys(map).sort((a,b)=>{
-    // sort dd/mm/yyyy desc
-    const [ad,am,ay]=a.split("/").map(Number);
-    const [bd,bm,by]=b.split("/").map(Number);
-    return new Date(by,bm-1,bd) - new Date(ay,am-1,ad);
-  }).map(t=>{
-    return `<tr>
+  // Urut terbaru dulu
+  const dates=Object.keys(map).sort((a,b)=>{const [ad,am,ay]=a.split("/").map(Number);const [bd,bm,by]=b.split("/").map(Number);return new Date(by,bm-1,bd)-new Date(ay,am-1,ad);});
+
+  // Render + tombol hapus (admin only)
+  let html = `<table><thead><tr>
+      <th>Tanggal</th><th class="right">Total Penjualan</th><th class="right">Total Laba</th><th>Aksi</th>
+  </tr></thead><tbody>`;
+  dates.forEach(t=>{
+    const aksi = (SESSION && SESSION.role==='admin')
+      ? `<button class="btn-danger" onclick="hapusLaporanTanggal('${t}')">🗑️ Hapus</button>`
+      : `<span class="muted">—</span>`;
+    html += `<tr>
       <td>${t}</td>
       <td class="right">Rp${fmtID(map[t].total)}</td>
       <td class="right">Rp${fmtID(map[t].laba)}</td>
+      <td class="center">${aksi}</td>
     </tr>`;
-  }).join("");
+  });
+  html += `</tbody></table>`;
+  box.innerHTML = html;
 
-  box.innerHTML = `<table>
-    <thead><tr><th>Tanggal</th><th class="right">Total Penjualan</th><th class="right">Total Laba</th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
-
-  // total keseluruhan dari data yang tampil
-  const grandTotal = data.reduce((a,b)=>a+(b.total||b.sub||0),0);
-  const grandLaba  = data.reduce((a,b)=>a+(b.laba||0),0);
-  sumBox.innerHTML = `Total Penjualan (tampilan ini): <b>Rp${fmtID(grandTotal)}</b> • Total Laba: <b>Rp${fmtID(grandLaba)}</b>`;
+  // Ringkasan total dari data yang tampil
+  const grandTotal=data.reduce((a,b)=>a+(b.total||b.sub||0),0);
+  const grandLaba =data.reduce((a,b)=>a+(b.laba||0),0);
+  sum.innerHTML=`Total Penjualan (tampilan ini): <b>Rp${fmtID(grandTotal)}</b> • Total Laba: <b>Rp${fmtID(grandLaba)}</b>`;
 }
 
+function hapusLaporanTanggal(tgl){
+  if(!SESSION || SESSION.role!=='admin') return alert("Hanya ADMIN yang bisa menghapus laporan.");
+  if(!confirm("Hapus semua transaksi pada tanggal "+tgl+" ?")) return;
+  laporan = laporan.filter(r=>r.tgl!==tgl);
+  localStorage.setItem("bsv_laporan_v2", JSON.stringify(laporan));
+  tampilLaporan();
+  alert("Laporan tanggal "+tgl+" sudah dihapus.");
+}
+
+/* ========= Filter ========= */
 function filterLaporan(){
-  const tgl = $("filterTanggal").value;   // yyyy-mm-dd
-  const bln = $("filterBulan").value;     // yyyy-mm
-  let data = laporan;
+  const tgl=$("filterTanggal").value; // yyyy-mm-dd
+  const bln=$("filterBulan").value;   // yyyy-mm
+  let data=laporan;
 
   if(tgl){
-    const [y,m,d]=tgl.split("-");
-    const target = `${d}/${m}/${y}`;
-    data = data.filter(x=>x.tgl===target);
+    const target=toDMY(tgl);
+    data=data.filter(x=>x.tgl===target);
   }else if(bln){
     const [y,m]=bln.split("-");
-    data = data.filter(x=>{
-      const [,mm,yy]=x.tgl.split("/");
-      return yy===y && mm===m;
-    });
+    data=data.filter(x=>{const [,mm,yy]=x.tgl.split("/"); return yy===y && mm===m;});
   }
   tampilLaporan(data);
 }
