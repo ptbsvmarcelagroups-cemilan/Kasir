@@ -70,9 +70,7 @@
 
 <script>
 const users={admin:"admin123",kasir:"kasir123"};
-let barangList=JSON.parse(localStorage.getItem("bsv_barang"))||[
-  {nama:"Kerupuk Basah",harga:8000,stok:100}
-];
+let barangList=JSON.parse(localStorage.getItem("bsv_barang"))||[]; // kosong
 let laporan=JSON.parse(localStorage.getItem("bsv_laporan"))||[];
 let keranjang=[];
 
@@ -92,15 +90,21 @@ function logout(){
 }
 function tampilBarang(){
   const sel=document.getElementById("barang");sel.innerHTML="";
-  barangList.forEach((b,i)=>{
+  if(barangList.length===0){
     const o=document.createElement("option");
-    o.value=i;o.textContent=`${b.nama} - Rp${b.harga}`;
-    sel.appendChild(o);
-  });
+    o.textContent="(Belum ada barang)";sel.appendChild(o);
+  }else{
+    barangList.forEach((b,i)=>{
+      const o=document.createElement("option");
+      o.value=i;o.textContent=`${b.nama} - Rp${b.harga}`;
+      sel.appendChild(o);
+    });
+  }
 }
 function tambah(){
   const i=document.getElementById("barang").value;
   const q=parseInt(document.getElementById("qty").value);
+  if(barangList.length===0)return alert("Belum ada barang di stok!");
   const b=barangList[i];
   if(b.stok<q){alert("Stok tidak cukup!");return;}
   b.stok-=q;
@@ -138,6 +142,7 @@ function cetakNota(tgl,jam,sub){
 }
 function tampilStok(){
   const d=document.getElementById("stok");
+  if(barangList.length===0){d.innerHTML="<p>Belum ada barang, tambahkan di bawah.</p>";return;}
   d.innerHTML="<table><tr><th>Nama</th><th>Harga</th><th>Stok</th></tr></table>";
   const t=d.querySelector("table");
   barangList.forEach((b,idx)=>{
@@ -176,6 +181,7 @@ function tambahBarang(){
 }
 function tampilLaporan(){
   const d=document.getElementById("laporan");
+  if(laporan.length===0){d.innerHTML="<p>Belum ada laporan transaksi.</p>";return;}
   d.innerHTML="<table><tr><th>Tanggal</th><th>Jam</th><th>Total</th></tr></table>";
   const t=d.querySelector("table");
   laporan.slice().reverse().forEach(l=>{
