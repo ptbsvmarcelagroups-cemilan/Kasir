@@ -65,9 +65,12 @@
 
   <!-- LAPORAN -->
   <div class="card">
-    <h3>📈 Laporan Harian</h3>
-    <label>Pilih tanggal:</label>
+    <h3>📈 Laporan Transaksi</h3>
+    <label>Filter tanggal:</label>
     <input type="date" id="filterTanggal" onchange="filterLaporan()">
+    <label>Filter bulan:</label>
+    <input type="month" id="filterBulan" onchange="filterBulan()">
+    <button onclick="tampilLaporan()">Tampilkan Semua</button>
     <div id="laporan"></div>
   </div>
 
@@ -126,4 +129,108 @@ function renderKeranjang(){
   let tot=0;
   keranjang.forEach((k,i)=>{
     tot+=k.total;
-    tb.innerHTML+=`<tr><td>${k.nama}</td><td>${k.qty}</td><td>${k.harga}</td><td>${k.total}</td><td><button onclick="hapus(${i})">x</button></td></tr>`
+    tb.innerHTML+=`<tr><td>${k.nama}</td><td>${k.qty}</td><td>${k.harga}</td><td>${k.total}</td><td><button onclick="hapus(${i})">x</button></td></tr>`;
+  });
+  document.getElementById("subtotal").innerText=tot;
+}
+function hapus(i){
+  const k=keranjang[i];barangList.find(b=>b.nama===k.nama).stok+=k.qty;
+  keranjang.splice(i,1);renderKeranjang();tampilStok();
+}
+function simpan(){
+  if(!keranjang.length)return alert("Keranjang kosong!");
+  const sub=keranjang.reduce((a,b)=>a+b.total,0);
+  const d=new Date(),tgl=d.toLocaleDateString("id-ID"),jam=d.toLocaleTimeString("id-ID");
+  laporan.push({tgl,jam,sub,items:keranjang});
+  localStorage.setItem("bsv_laporan",JSON.stringify(laporan));
+  localStorage.setItem("bsv_barang",JSON.stringify(barangList));
+  cetakNota(tgl,jam,sub);keranjang=[];renderKeranjang();tampilLaporan();
+}
+function cetakNota(tgl,jam,sub){
+  let nota=`🧾 PT. BSV Marcela Groups\nTanggal: ${tgl} • Jam: ${jam}\n-----------------\n`;
+  keranjang.forEach(k=>nota+=`${k.nama} x${k.qty} = Rp${k.total}\n`);
+  nota+=`-----------------\nTotal: Rp${sub}\nTerima kasih 🙏`;
+  const w=window.open("","nota","width=380,height=600");
+  w.document.write(`<pre>${nota}</pre>`);w.print();
+}
+function tampilStok(){
+  const d=document.getElementById("stok");
+  if(barangList.length===0){d.innerHTML="<p>Belum ada barang, tambahkan di bawah.</p>";return;}
+  d.innerHTML="<table><tr><th>Nama</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr></table>";
+  const t=d.querySelector("table");
+  barangList.forEach((b,idx)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${b.nama}</td>
+    <td class='editable' onclick='editHarga(${idx})'>Rp${b.harga}</td>
+    <td class='editable' onclick='editStok(${idx})'>${b.stok}</td>
+    <td><button class='hapusBtn' onclick='hapusBarang(${idx})'>Hapus</button></td>`;
+    t.appendChild(tr);
+  });
+}
+function editHarga(i){
+  const val=prompt("Masukkan harga baru:",barangList[i].harga);
+  if(val===null)return;
+  barangList[i].harga=parseInt(val)||barangList[i].harga;
+  simpanBarang();
+}
+function editStok(i){
+  const val=prompt("Masukkan stok baru:",barangList[i].stok);
+  if(val===null)return;
+  barangList[i].stok=parseInt(val)||barangList[i].stok;
+  simpanBarang();
+}
+function hapusBarang(i){
+  if(confirm("Yakin hapus barang ini?")){
+    barangList.splice(i,1);
+    simpanBarang();
+  }
+}
+function tambahBarang(){
+  const n=document.getElementById("namaBarang").value.trim();
+  const h=parseInt(document.getElementById("hargaBarang").value);
+  const s=parseInt(document.getElementById("stokBarang").value);
+  if(!n)return alert("Nama wajib diisi");
+  barangList.push({nama:n,harga:h,stok:s});
+  simpanBarang();
+  document.getElementById("namaBarang").value="";
+  document.getElementById("hargaBarang").value="";
+  document.getElementById("stokBarang").value="";
+}
+function simpanBarang(){
+  localStorage.setItem("bsv_barang",JSON.stringify(barangList));
+  tampilBarang();tampilStok();
+}
+function tampilLaporan(data=laporan){
+  const d=document.getElementById("laporan");
+  if(data.length===0){d.innerHTML="<p>Belum ada laporan transaksi.</p>";return;}
+  d.innerHTML="<table><tr><th>Tanggal</th><th>Jam</th><th>Total</th></tr></table>";
+  const t=d.querySelector("table");
+  data.slice().reverse().forEach(l=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${l.tgl}</td><td>${l.jam}</td><td>Rp${l.sub}</td>`;
+    t.appendChild(tr);
+  });
+}
+function filterLaporan(){
+  const filter=document.getElementById("filterTanggal").value;
+  if(!filter){tampilLaporan();return;}
+  const data=laporan.filter(l=>{
+    const [dd,mm,yy]=l.tgl.split("/");
+    const format=`${yy.padStart(4,"0")}-${mm.padStart(2,"0")}-${dd.padStart(2,"0")}`;
+    return format===filter;
+  });
+  tampilLaporan(data);
+}
+function filterBulan(){
+  const bulan=document.getElementById("filterBulan").value;
+  if(!bulan){tampilLaporan();return;}
+  const [yy,mm]=bulan.split("-");
+  const data=laporan.filter(l=>{
+    const [dd,bb,tt]=l.tgl.split("/");
+    return tt===yy && bb===mm;
+  });
+  tampilLaporan(data);
+}
+</script>
+</body>
+</html>
