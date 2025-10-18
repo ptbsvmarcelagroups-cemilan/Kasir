@@ -5,87 +5,68 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PT. BSV MARCELA GROUPS – Kasir Online Nanga Pinoh</title>
 <style>
-  :root{
-    --bg:#0f172a;
-    --card:#111827;
-    --muted:#1f2937;
-    --primary:#38bdf8;
-    --primary-strong:#0ea5e9;
-    --text:#e5e7eb;
-    --text-dim:#94a3b8;
-    --ok:#22c55e;
-    --warn:#f59e0b;
-    --danger:#ef4444;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;
-    color:var(--text); background:var(--bg);
-  }
-  .container{max-width:1120px;margin:0 auto;padding:20px}
+  body{font-family:Segoe UI,Arial,sans-serif;background:#0f172a;color:#e5e7eb;margin:0}
   header{background:#0ea5e9;color:white;padding:15px;text-align:center;font-weight:bold}
-  .login,.card{background:#111827;border-radius:10px;padding:20px;margin-top:20px;box-shadow:0 0 10px rgba(0,0,0,0.3)}
+  .container{max-width:900px;margin:auto;padding:20px}
+  .card{background:#111827;border-radius:10px;padding:20px;margin-top:20px}
   input,select,button{width:100%;padding:10px;margin:5px 0;border:none;border-radius:6px}
   input,select{background:#e2e8f0;color:#000}
   button{background:#38bdf8;color:#000;font-weight:bold;cursor:pointer}
   button:hover{background:#0ea5e9}
   table{width:100%;border-collapse:collapse;margin-top:10px}
-  th,td{border-bottom:1px solid #334155;padding:8px;text-align:left}
+  th,td{border-bottom:1px solid #334155;padding:8px}
   th{background:#1e293b}
-  footer{text-align:center;margin-top:20px;color:#94a3b8;font-size:0.9em}
+  td.editable:hover{background:#1e3a8a;cursor:pointer}
 </style>
 </head>
 <body>
-  <header>💼 PT. BSV MARCELA GROUPS – Kasir Online Nanga Pinoh</header>
+<header>💼 PT. BSV MARCELA GROUPS – Kasir Online Nanga Pinoh</header>
 
-  <!-- LOGIN -->
-  <div id="login" class="login container">
-    <h3>🔐 Login Kasir</h3>
-    <input id="username" placeholder="Username (admin / kasir)">
-    <input id="password" type="password" placeholder="Password">
-    <button onclick="login()">Masuk</button>
-    <p id="msg" style="color:#f87171"></p>
+<div id="login" class="card container">
+  <h3>🔐 Login Kasir</h3>
+  <input id="username" placeholder="Username (admin / kasir)">
+  <input id="password" type="password" placeholder="Password">
+  <button onclick="login()">Masuk</button>
+  <p id="msg" style="color:#f87171"></p>
+</div>
+
+<div id="app" class="container" style="display:none">
+  <h2 id="welcome"></h2>
+
+  <div class="card">
+    <h3>🛒 Transaksi Penjualan</h3>
+    <select id="barang"></select>
+    <input type="number" id="qty" value="1" min="1">
+    <button onclick="tambah()">Tambah</button>
+
+    <table>
+      <thead><tr><th>Barang</th><th>Qty</th><th>Harga</th><th>Total</th><th></th></tr></thead>
+      <tbody id="keranjang"></tbody>
+      <tfoot><tr><th colspan="3">Subtotal</th><th id="subtotal">0</th><th></th></tr></tfoot>
+    </table>
+
+    <button onclick="simpan()">Simpan & Cetak Nota</button>
   </div>
 
-  <!-- APP -->
-  <div id="app" class="container" style="display:none">
-    <h2 id="welcome"></h2>
-    <div class="card">
-      <h3>🛒 Transaksi Penjualan</h3>
-      <select id="barang"></select>
-      <input type="number" id="qty" value="1" min="1">
-      <button onclick="tambah()">Tambah</button>
-
-      <table>
-        <thead><tr><th>Barang</th><th>Qty</th><th>Harga</th><th>Total</th><th></th></tr></thead>
-        <tbody id="keranjang"></tbody>
-        <tfoot><tr><th colspan="3">Subtotal</th><th id="subtotal">0</th><th></th></tr></tfoot>
-      </table>
-
-      <button onclick="simpan()">Simpan & Cetak Nota</button>
-    </div>
-
-    <div class="card">
-      <h3>📦 Stok Barang</h3>
-      <div id="stok"></div>
-      <h4>Tambah Barang</h4>
-      <input id="namaBarang" placeholder="Nama Barang">
-      <input id="hargaBarang" type="number" placeholder="Harga">
-      <input id="stokBarang" type="number" placeholder="Stok">
-      <button onclick="tambahBarang()">Tambah Barang</button>
-    </div>
-
-    <div class="card">
-      <h3>📈 Laporan Harian</h3>
-      <div id="laporan"></div>
-      <button onclick="exportCSV()">⬇️ Export ke Excel (CSV)</button>
-    </div>
-
-    <button style="background:#ef4444;color:white" onclick="logout()">Logout</button>
+  <div class="card">
+    <h3>📦 Stok Barang (klik harga/stok untuk ubah)</h3>
+    <div id="stok"></div>
+    <h4>Tambah Barang Baru</h4>
+    <input id="namaBarang" placeholder="Nama Barang">
+    <input id="hargaBarang" type="number" placeholder="Harga">
+    <input id="stokBarang" type="number" placeholder="Stok">
+    <button onclick="tambahBarang()">Tambah Barang</button>
   </div>
 
-  <footer>© 2025 PT. BSV Marcela Groups</footer>
+  <div class="card">
+    <h3>📈 Laporan Harian</h3>
+    <div id="laporan"></div>
+  </div>
+
+  <button style="background:#ef4444;color:white" onclick="logout()">Logout</button>
+</div>
+
+<footer style="text-align:center;margin:20px;color:#94a3b8">© 2025 PT. BSV Marcela Groups</footer>
 
 <script>
 const users={admin:"admin123",kasir:"kasir123"};
@@ -105,12 +86,10 @@ function login(){
     tampilBarang();tampilStok();tampilLaporan();
   }else document.getElementById("msg").innerText="Username atau password salah!";
 }
-
 function logout(){
   document.getElementById("login").style.display="block";
   document.getElementById("app").style.display="none";
 }
-
 function tampilBarang(){
   const sel=document.getElementById("barang");sel.innerHTML="";
   barangList.forEach((b,i)=>{
@@ -161,11 +140,27 @@ function tampilStok(){
   const d=document.getElementById("stok");
   d.innerHTML="<table><tr><th>Nama</th><th>Harga</th><th>Stok</th></tr></table>";
   const t=d.querySelector("table");
-  barangList.forEach(b=>{
+  barangList.forEach((b,idx)=>{
     const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${b.nama}</td><td>${b.harga}</td><td>${b.stok}</td>`;
+    tr.innerHTML=`<td>${b.nama}</td>
+    <td class='editable' onclick='editHarga(${idx})'>Rp${b.harga}</td>
+    <td class='editable' onclick='editStok(${idx})'>${b.stok}</td>`;
     t.appendChild(tr);
   });
+}
+function editHarga(i){
+  const val=prompt("Masukkan harga baru:",barangList[i].harga);
+  if(val===null)return;
+  barangList[i].harga=parseInt(val)||barangList[i].harga;
+  localStorage.setItem("bsv_barang",JSON.stringify(barangList));
+  tampilBarang();tampilStok();
+}
+function editStok(i){
+  const val=prompt("Masukkan stok baru:",barangList[i].stok);
+  if(val===null)return;
+  barangList[i].stok=parseInt(val)||barangList[i].stok;
+  localStorage.setItem("bsv_barang",JSON.stringify(barangList));
+  tampilBarang();tampilStok();
 }
 function tambahBarang(){
   const n=document.getElementById("namaBarang").value.trim();
@@ -188,16 +183,6 @@ function tampilLaporan(){
     tr.innerHTML=`<td>${l.tgl}</td><td>${l.jam}</td><td>Rp${l.sub}</td>`;
     t.appendChild(tr);
   });
-}
-function exportCSV(){
-  const r=[["Tanggal","Jam","Total"]];
-  laporan.forEach(l=>r.push([l.tgl,l.jam,l.sub]));
-  const csv=r.map(a=>a.join(",")).join("\n");
-  const blob=new Blob([csv],{type:"text/csv"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;a.download="laporan_kasir_bsv.csv";
-  a.click();URL.revokeObjectURL(url);
 }
 </script>
 </body>
