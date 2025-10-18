@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💼 PT. BSV Marcela Groups – Kasir Online Nanga Pinoh</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #1a202c;
+      color: #f1f5f9;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background: #0ea5e9;
+      color: white;
+      padding: 15px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    .login-box, .app {
+      max-width: 500px;
+      margin: 40px auto;
+      background: #2d3748;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    input, select, button {
+      width: 90%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+    input, select {
+      background: #e2e8f0;
+      color: #000;
+    }
+    button {
+      background: #38bdf8;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { background: #0ea5e9; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border-bottom: 1px solid #475569;
+      padding: 6px;
+    }
+    th { background: #334155; }
+    footer {
+      margin-top: 30px;
+      font-size: 0.9em;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <header>💼 PT. BSV Marcela Groups – Kasir Online Nanga Pinoh</header>
+
+  <!-- LOGIN -->
+  <div id="login" class="login-box">
+    <h3>🔐 Login Kasir</h3>
+    <input id="username" placeholder="Username (admin / kasir)" />
+    <input id="password" type="password" placeholder="Password" />
+    <button onclick="login()">Masuk</button>
+    <p id="login-msg" style="color:#f87171;"></p>
+  </div>
+
+  <!-- APLIKASI -->
+  <div id="app" class="app" style="display:none;">
+    <h3 id="welcome"></h3>
+
+    <h4>🛒 Transaksi Penjualan</h4>
+    <select id="barang"></select>
+    <input type="number" id="qty" value="1" min="1" />
+    <button onclick="tambahTransaksi()">Tambah</button>
+
+    <table>
+      <thead>
+        <tr><th>Barang</th><th>Qty</th><th>Harga</th><th>Total</th><th></th></tr>
+      </thead>
+      <tbody id="keranjang"></tbody>
+      <tfoot><tr><th colspan="3">Subtotal</th><th id="subtotal">0</th><th></th></tr></tfoot>
+    </table>
+    <button onclick="simpanTransaksi()">Simpan & Cetak Nota</button>
+
+    <h4>📦 Stok Barang</h4>
+    <div id="stok"></div>
+
+    <h4>📈 Laporan Harian</h4>
+    <div id="laporan"></div>
+
+    <button style="background:#ef4444;" onclick="logout()">Logout</button>
+  </div>
+
+  <footer>© 2025 PT. BSV Marcela Groups</footer>
+
+  <script>
+    // --- DATA SIMULASI / PENYIMPANAN LOCAL ---
+    const users = { admin: "admin123", kasir: "kasir123" };
+    let barangList = JSON.parse(localStorage.getItem("bsv_barang")) || [
+      { nama: "Kerupuk Basah", harga: 8000, stok: 100 },
+      { nama: "Bibit", harga: 25000, stok: 50 }
+    ];
+    let laporan = JSON.parse(localStorage.getItem("bsv_laporan")) || [];
+    let keranjang = [];
+
+    const elLogin = document.getElementById("login");
+    const elApp = document.getElementById("app");
+    const elBarang = document.getElementById("barang");
+    const elKeranjang = document.getElementById("keranjang");
+    const elSubtotal = document.getElementById("subtotal");
+    const elWelcome = document.getElementById("welcome");
+    const elStok = document.getElementById("stok");
+    const elLaporan = document.getElementById("laporan");
+    const elMsg = document.getElementById("login-msg");
+
+    // --- LOGIN ---
+    function login() {
+      const u = document.getElementById("username").value.trim().toLowerCase();
+      const p = document.getElementById("password").value.trim();
+      if (users[u] && users[u] === p) {
+        elLogin.style.display = "none";
+        elApp.style.display = "block";
+        elWelcome.textContent = "👋 Selamat datang, " + u.toUpperCase();
+        tampilBarang();
+        tampilStok();
+        tampilLaporan();
+      } else {
+        elMsg.textContent = "Username atau password salah!";
+      }
+    }
+
+    function logout() {
+      elApp.style.display = "none";
+      elLogin.style.display = "block";
+      document.getElementById("username").value = "";
+      document.getElementById("password").value = "";
+    }
+
+    // --- BARANG ---
+    function tampilBarang() {
+      elBarang.innerHTML = "";
+      barangList.forEach((b, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = `${b.nama} - Rp${b.harga}`;
+        elBarang.appendChild(opt);
+      });
+    }
+
+    // --- TAMBAH TRANSAKSI ---
+    function tambahTransaksi() {
+      const idx = elBarang.value;
+      const qty = parseInt(document.getElementById("qty").value);
+      const barang = barangList[idx];
+      if (barang.stok < qty) return alert("Stok tidak cukup!");
+      barang.stok -= qty;
+      keranjang.push({ ...barang, qty, total: barang.harga * qty });
+      renderKeranjang();
+      tampilStok();
+    }
+
+    function renderKeranjang() {
+      elKeranjang.innerHTML = "";
+      let total = 0;
+      keranjang.forEach((k, i) => {
+        total += k.total;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${k.nama}</td><td>${k.qty}</td><td>${k.harga}</td><td>${k.total}</td><td><button onclick="hapusItem(${i})">❌</button></td>`;
+        elKeranjang.appendChild(tr);
+      });
+      elSubtotal.textContent = total;
+    }
+
+    function hapusItem(i) {
+      const k = keranjang[i];
+      const idx = barangList.findIndex(b => b.nama === k.nama);
+      barangList[idx].stok += k.qty;
+      keranjang.splice(i, 1);
+      renderKeranjang();
+      tampilStok();
+    }
+
+    // --- SIMPAN TRANSAKSI ---
+    function simpanTransaksi() {
+      if (keranjang.length === 0) return alert("Keranjang kosong!");
+      const subtotal = keranjang.reduce((a, b) => a + b.total, 0);
+      const now = new Date();
+      const tanggal = now.toLocaleDateString("id-ID");
+      const jam = now.toLocaleTimeString("id-ID");
+
+      laporan.push({ tanggal, jam, subtotal, items: keranjang });
+      localStorage.setItem("bsv_laporan", JSON.stringify(laporan));
+      localStorage.setItem("bsv_barang", JSON.stringify(barangList));
+
+      alert("Transaksi tersimpan!");
+      cetakNota(tanggal, jam, subtotal);
+      keranjang = [];
+      renderKeranjang();
+      tampilLaporan();
+    }
+
+    function cetakNota(tanggal, jam, subtotal) {
+      let nota = "🧾 PT. BSV Marcela Groups\\nKasir Online Nanga Pinoh\\n";
+      nota += `Tanggal: ${tanggal} | Jam: ${jam}\\n`;
+      nota += "--------------------------\\n";
+      keranjang.forEach(k => {
+        nota += `${k.nama} x${k.qty} = Rp${k.total}\\n`;
+      });
+      nota += "--------------------------\\n";
+      nota += `Total: Rp${subtotal}\\nTerima kasih 🙏`;
+      const w = window.open("", "Nota", "width=400,height=600");
+      w.document.write(`<pre>${nota}</pre>`);
+      w.print();
+    }
+
+    // --- STOK ---
+    function tampilStok() {
+      elStok.innerHTML = "<table><tr><th>Nama</th><th>Harga</th><th>Stok</th></tr></table>";
+      const tbl = elStok.querySelector("table");
+      barangList.forEach(b => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${b.nama}</td><td>${b.harga}</td><td>${b.stok}</td>`;
+        tbl.appendChild(tr);
+      });
+    }
+
+    // --- LAPORAN ---
+    function tampilLaporan() {
+      elLaporan.innerHTML = "<table><tr><th>Tanggal</th><th>Jam</th><th>Total</th></tr></table>";
+      const tbl = elLaporan.querySelector("table");
+      laporan.slice().reverse().forEach(l => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${l.tanggal}</td><td>${l.jam}</td><td>Rp${l.subtotal}</td>`;
+        tbl.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>
