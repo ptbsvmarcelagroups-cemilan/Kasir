@@ -387,3 +387,278 @@ function simpan() {
   renderKeranjang();
   tampilLaporan();
 }
+/* ======================= */
+/*         STOK            */
+/* ======================= */
+function renderStok() {
+  const box = $("stok");
+  if (!barang.length) { box.innerHTML = "<p>Belum ada barang. Tambahkan di bawah.</p>"; return; }
+
+  let html = `
+    <table>
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th class="right">Harga Beli</th>
+          <th class="right">Harga Jual</th>
+          <th class="center">Stok</th>
+          <th class="center">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  barang.forEach((b, i) => {
+    html += `
+      <tr>
+        <td>${b.nama}</td>
+        <td class="right"><a href="#" onclick="editHbeli(${i});return false;">Rp${fmt(b.hbeli || 0)}</a></td>
+        <td class="right"><a href="#" onclick="editHjual(${i});return false;">Rp${fmt(b.harga || 0)}</a></td>
+        <td class="center"><a href="#" onclick="editStok(${i});return false;">${b.stok || 0}</a></td>
+        <td class="center"><button class="danger" onclick="hapusBarang(${i})">Hapus</button></td>
+      </tr>
+    `;
+  });
+  html += `</tbody></table>`;
+  box.innerHTML = html;
+}
+
+function tambahBarang() {
+  const nama = $("namaBarang").value.trim();
+  const hbeli = parseInt(($("hargaBeli").value || "0"), 10);
+  const harga = parseInt(($("hargaJual").value || "0"), 10);
+  const stok  = parseInt(($("stokBarang").value  || "0"), 10);
+  if (!nama) return alert("Nama barang wajib diisi.");
+
+  barang.push({ nama, hbeli: isNaN(hbeli) ? 0 : hbeli, harga: isNaN(harga) ? 0 : harga, stok: isNaN(stok) ? 0 : stok });
+  saveBarang();
+  $("namaBarang").value = $("hargaBeli").value = $("hargaJual").value = $("stokBarang").value = "";
+  renderBarang(); renderStok();
+}
+
+function editHbeli(i){
+  const v = prompt("Harga BELI baru:", barang[i].hbeli || 0);
+  if (v === null) return;
+  const x = parseInt(v, 10);
+  if (!isNaN(x)) { barang[i].hbeli = x; saveBarang(); renderStok(); }
+}
+
+function editHjual(i){
+  const v = prompt("Harga JUAL baru:", barang[i].harga || 0);
+  if (v === null) return;
+  const x = parseInt(v, 10);
+  if (!isNaN(x)) { barang[i].harga = x; saveBarang(); renderStok(); renderBarang(); }
+}
+
+function editStok(i){
+  const v = prompt("STOK baru:", barang[i].stok || 0);
+  if (v === null) return;
+  const x = parseInt(v, 10);
+  if (!isNaN(x)) { barang[i].stok = x; saveBarang(); renderStok(); renderBarang(); }
+}
+
+function hapusBarang(i){
+  if (!confirm("Hapus barang ini?")) return;
+  barang.splice(i, 1);
+  saveBarang(); renderStok(); renderBarang();
+}
+
+/* ======================= */
+/*         LAPORAN         */
+/* ======================= */
+function tampilLaporan(data = laporan) {
+  const box = $("laporan"), sum = $("ringkas");
+  if (!data.length) { box.innerHTML = "<p>Belum ada laporan.</p>"; sum.innerHTML=""; return; }
+
+  // Rekap per tanggal
+  const map = {};
+  data.forEach(r => {
+    if (!map[r.tgl]) map[r.tgl] = { total: 0, count: 0 };
+    map[r.tgl].total += r.total || 0;
+    map[r.tgl].count += 1;
+  });
+
+  const dates = Object.keys(map).sort((a,b) => {
+    const [ad,am,ay] = a.split("/").map(Number);
+    const [bd,bm,by] = b.split("/").map(Number);
+    return new Date(by,bm-1,bd) - new Date(ay,am-1,ad);
+  });
+
+  let html = `
+    <table>
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th class="right">Total Penjualan</th>
+          <th class="center">Jumlah Transaksi</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  dates.forEach(t => {
+    html += `
+      <tr>
+        <td>${t}</td>
+        <td class="right">Rp${fmt(map[t].total)}</td>
+        <td class="center">${map[t].count}</td>
+      </tr>
+    `;
+  });
+  html += `</tbody></table>`;
+  box.innerHTML = html;
+
+  const grand = data.reduce((a,b)=>a+(b.total||0),0);
+  sum.innerHTML = `Total (tampilan ini): <b>Rp${fmt(grand)}</b>`;
+}
+
+function filterLaporan(){
+  const dt = $("filterTanggalLap").value;   // yyyy-mm-dd
+  const mo = $("filterBulanLap").value;     // yyyy-mm
+  let data = laporan;
+  if (dt) {
+    const t = toDMY(dt);
+    data = data.filter(x => x.tgl === t);
+  } else if (mo) {
+    const [y,m] = mo.split("-");
+    data = data.filter(x => { const [,mm,yy] = x.tgl.split("/"); return yy === y && mm === m; });
+  }
+  tampilLaporan(data);
+}
+
+/* ======================= */
+/*        KEUANGAN         */
+/* ======================= */
+function keuTampil(data = keuangan) {
+  const box = $("keuTabel"), sum = $("keuRingkas");
+  if (!data.length) { box.innerHTML="<p>Belum ada data keuangan.</p>"; sum.innerHTML=""; return; }
+
+  let pemasukan=0, pengeluaran=0;
+  let rows = data.slice().sort((a,b)=>{
+    const [ad,am,ay]=a.tgl.split('/').map(Number);
+    const [bd,bm,by]=b.tgl.split('/').map(Number);
+    return new Date(by,bm-1,bd) - new Date(ay,am-1,ad);
+  }).map(e=>{
+    if (e.jenis==='pemasukan') pemasukan += (e.nominal||0);
+    else pengeluaran += (e.nominal||0);
+    return `
+      <tr>
+        <td>${e.tgl}</td>
+        <td>${e.ket||"-"}</td>
+        <td class="${e.jenis==='pemasukan'?'':'muted'}">${(e.jenis||'').toUpperCase()}</td>
+        <td class="right">Rp${fmt(e.nominal||0)}</td>
+        <td class="center">
+          <button onclick="keuEdit('${e.id||''}')">✏</button>
+          <button class="danger" onclick="keuHapus('${e.id||''}')">🗑</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  box.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Tanggal</th><th>Keterangan</th><th>Jenis</th><th class="right">Nominal</th><th class="center">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+
+  const saldo = pemasukan - pengeluaran;
+  sum.innerHTML = `Pemasukan: <b>Rp${fmt(pemasukan)}</b> • Pengeluaran: <b>Rp${fmt(pengeluaran)}</b> • Saldo: <b>Rp${fmt(saldo)}</b>`;
+}
+
+function keuTambah(){
+  const iso = $("keuTanggal").value || todayISO();
+  const tgl = toDMY(iso);
+  const jenis = $("keuJenis").value;
+  const ket = $("keuKet").value.trim() || (jenis === "pemasukan" ? "Pemasukan" : "Pengeluaran");
+  const nominal = parseInt(($("keuNominal").value || "0"),10);
+  if (!nominal || nominal < 0) return alert("Nominal tidak valid.");
+
+  const id = String(Date.now()) + Math.random().toString(36).slice(2);
+  keuangan.push({ id, tgl, jenis, ket, nominal });
+  saveKeuangan();
+  $("keuKet").value = $("keuNominal").value = "";
+  keuTampil();
+}
+
+function keuEdit(id){
+  const e = keuangan.find(x=>x.id===id);
+  if (!e) return;
+  const tgl = prompt("Tanggal (dd/mm/yyyy):", e.tgl); if (tgl===null) return;
+  const ket = prompt("Keterangan:", e.ket); if (ket===null) return;
+  const jenis= prompt("Jenis (pemasukan/pengeluaran):", e.jenis); if (jenis===null) return;
+  const nominal = parseInt(prompt("Nominal:", e.nominal),10); if (isNaN(nominal)) return;
+  Object.assign(e, { tgl, ket, jenis: (jenis.toLowerCase()==='pengeluaran'?'pengeluaran':'pemasukan'), nominal });
+  saveKeuangan(); keuTampil();
+}
+
+function keuHapus(id){
+  if (!confirm("Hapus entri ini?")) return;
+  keuangan = keuangan.filter(x=>x.id!==id);
+  saveKeuangan(); keuTampil();
+}
+
+function keuFilter(){
+  const dt = $("keuFilterTanggal").value;
+  const mo = $("keuFilterBulan").value;
+  let data = keuangan;
+  if (dt) {
+    const t = toDMY(dt);
+    data = data.filter(x => x.tgl === t);
+  } else if (mo) {
+    const [y,m] = mo.split("-");
+    data = data.filter(x => { const [,mm,yy] = x.tgl.split("/"); return yy === y && mm === m; });
+  }
+  keuTampil(data);
+}
+
+/* ======================= */
+/*          USER           */
+/* ======================= */
+function renderUsers(){
+  const rows = USERS.map(u => `
+    <tr>
+      <td>${u.username}</td>
+      <td class="center">
+        <button onclick="userPass('${u.username}')">Ganti Password</button>
+        ${u.username==='admin'?'':`<button class="danger" onclick="userDel('${u.username}')">Hapus</button>`}
+      </td>
+    </tr>
+  `).join("");
+
+  $("userTable").innerHTML = `
+    <table>
+      <thead><tr><th>Username</th><th class="center">Aksi</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function userAdd(){
+  const name = $("userNewName").value.trim();
+  const pass = $("userNewPass").value.trim();
+  if (!name || !pass) return alert("Isi username & password.");
+  if (USERS.find(u=>u.username===name)) return alert("Username sudah ada.");
+  USERS.push({ username: name, password: pass });
+  localStorage.setItem("bsv_users", JSON.stringify(USERS));
+  $("userNewName").value = $("userNewPass").value = "";
+  renderUsers();
+}
+
+function userPass(username){
+  const u = USERS.find(x=>x.username===username); if (!u) return;
+  const p = prompt("Password baru untuk "+username+":",""); if (!p) return;
+  u.password = p; saveUsers(); alert("Password diperbarui.");
+}
+
+function userDel(username){
+  if (!confirm("Hapus user "+username+" ?")) return;
+  USERS = USERS.filter(u=>u.username!==username);
+  saveUsers(); renderUsers();
+}
+</script>
+
+</body>
+</html>
