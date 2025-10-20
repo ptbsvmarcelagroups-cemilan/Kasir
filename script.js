@@ -183,3 +183,98 @@ function simpanTransaksi() {
   renderKeranjang();
   alert("✅ Transaksi berhasil disimpan!");
 }
+// ============================
+// 7. STOK BARANG
+// ============================
+function loadStok() {
+  let html = `
+    <h2>📦 Manajemen Stok Barang</h2>
+    <button onclick="formTambahBarang()" class="btn-primary">+ Tambah Barang</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Nama Barang</th>
+          <th>Harga</th>
+          <th>Stok</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="stokTable"></tbody>
+    </table>
+  `;
+  document.getElementById("content").innerHTML = html;
+  renderStok();
+}
+
+function renderStok() {
+  let tbody = document.getElementById("stokTable");
+  tbody.innerHTML = "";
+
+  barangList.forEach((b, i) => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${b.nama}</td>
+        <td>Rp${b.harga.toLocaleString()}</td>
+        <td>${b.stok}</td>
+        <td>
+          <button onclick="editBarang(${i})">✏ Edit</button>
+          <button class="btn-danger" onclick="hapusBarang(${i})">🗑 Hapus</button>
+        </td>
+      </tr>
+    `;
+  });
+  saveBarang();
+}
+
+function formTambahBarang() {
+  document.getElementById("content").innerHTML = `
+    <h2>➕ Tambah Barang Baru</h2>
+    <input type="text" id="namaBarang" placeholder="Nama Barang">
+    <input type="number" id="hargaBarang" placeholder="Harga (Rp)">
+    <input type="number" id="stokBarang" placeholder="Stok">
+    <button onclick="tambahBarangBaru()" class="btn-primary">Simpan</button>
+    <button onclick="showPage('stok')" class="btn">Batal</button>
+  `;
+}
+
+function tambahBarangBaru() {
+  const nama = document.getElementById("namaBarang").value.trim();
+  const harga = parseInt(document.getElementById("hargaBarang").value);
+  const stok = parseInt(document.getElementById("stokBarang").value);
+
+  if (!nama || isNaN(harga) || isNaN(stok)) {
+    alert("Isi semua data dengan benar!");
+    return;
+  }
+
+  barangList.push({ nama, harga, stok });
+  saveBarang();
+  alert("✅ Barang berhasil ditambahkan!");
+  showPage('stok');
+}
+
+function editBarang(index) {
+  const b = barangList[index];
+  const nama = prompt("Nama Barang:", b.nama);
+  const harga = prompt("Harga Barang:", b.harga);
+  const stok = prompt("Stok Barang:", b.stok);
+
+  if (nama !== null && harga !== null && stok !== null) {
+    barangList[index] = {
+      nama: nama,
+      harga: parseInt(harga),
+      stok: parseInt(stok)
+    };
+    saveBarang();
+    renderStok();
+    alert("✅ Barang berhasil diupdate!");
+  }
+}
+
+function hapusBarang(index) {
+  if (confirm("Hapus barang ini?")) {
+    barangList.splice(index, 1);
+    saveBarang();
+    renderStok();
+  }
+}
