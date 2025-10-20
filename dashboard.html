@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – Kasir BSV</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  💼 PT. BSV Marcela Groups – Dashboard
+  <button onclick="logout()" class="logout-btn">Logout</button>
+</header>
+
+<nav class="sidebar">
+  <button onclick="showPage('transaksi')" class="active">🛒 Transaksi</button>
+  <button onclick="showPage('stok')">📦 Stok Barang</button>
+  <button onclick="showPage('laporan')">📈 Laporan</button>
+  <button onclick="showPage('keuangan')">💸 Keuangan</button>
+</nav>
+
+<main id="content">
+  <!-- Konten halaman akan dimuat di sini -->
+  <h2>Selamat datang 👋</h2>
+  <p>Silakan pilih menu di samping</p>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
