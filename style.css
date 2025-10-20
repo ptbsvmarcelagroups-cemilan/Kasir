@@ -59,3 +59,53 @@ button:hover {
   color: #f87171;
   margin-top: 10px;
 }
+.topbar {
+  background: #0ea5e9;
+  color: white;
+  padding: 12px 20px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logout-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.sidebar {
+  background: #1e293b;
+  width: 200px;
+  position: fixed;
+  top: 50px;
+  bottom: 0;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar button {
+  background: #334155;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sidebar .active {
+  background: #38bdf8;
+  color: black;
+}
+
+main {
+  margin-left: 220px;
+  padding: 20px;
+}
