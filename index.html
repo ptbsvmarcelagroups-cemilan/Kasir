@@ -3,13 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kasir PT. BSV Marcela Groups — Final</title>
+<title>Kasir PT. BSV Marcela Groups — FINAL</title>
 <style>
-  :root{
-    --bg:#0f172a;--card:#1e293b;--muted:#94a3b8;--accent:#0ea5e9;--primary:#38bdf8;--danger:#ef4444;--border:#334155;--text:#e5e7eb;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  :root{--bg:#0f172a;--card:#1e293b;--muted:#94a3b8;--accent:#0ea5e9;--primary:#38bdf8;--danger:#ef4444;--border:#334155;--text:#e5e7eb}
+  *{box-sizing:border-box} body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
   .container{max-width:960px;margin:auto;padding:16px}
   .card{background:var(--card);border-radius:12px;padding:16px;margin:14px 0}
   .header{position:sticky;top:0;z-index:10;background:var(--accent);color:#fff;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px;font-weight:700}
@@ -30,17 +27,17 @@
   .right{text-align:right}.center{text-align:center}
   .muted{color:var(--muted)}
   .hidden{display:none}
-  /* login */
+  /* LOGIN */
   .login-wrap{min-height:100vh;display:grid;place-items:center;padding:20px}
   .login-box{width:100%;max-width:360px;background:var(--card);padding:28px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);text-align:center}
-  /* section width compact */
+  /* Compact section width */
   section .card{max-width:900px;margin-left:auto;margin-right:auto}
   @media (max-width:900px){.container{padding:12px}}
 </style>
 </head>
 <body>
 
-<!-- ================= LOGIN ================= -->
+<!-- ============== LOGIN ============== -->
 <div id="loginView" class="login-wrap">
   <div class="login-box">
     <h2>💼 PT. BSV Marcela Groups</h2>
@@ -52,7 +49,7 @@
   </div>
 </div>
 
-<!-- ================= APP ================= -->
+<!-- ============== APP ============== -->
 <div id="appView" class="hidden">
   <div class="header">
     <div>📦 Kasir PT. BSV Marcela Groups</div>
@@ -114,14 +111,8 @@
       <div class="card">
         <h3>📈 Laporan Penjualan</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:520px">
-          <div>
-            <label>Filter Tanggal</label>
-            <input type="date" id="lapDate">
-          </div>
-          <div>
-            <label>Filter Bulan</label>
-            <input type="month" id="lapMonth">
-          </div>
+          <div><label>Filter Tanggal</label><input type="date" id="lapDate"></div>
+          <div><label>Filter Bulan</label><input type="month" id="lapMonth"></div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
           <button class="btn" onclick="renderLaporan()">Tampilkan Semua</button>
@@ -196,22 +187,22 @@ function doLogin(){
     $("loginView").classList.add("hidden");
     $("appView").classList.remove("hidden");
     boot();
+    showTab('transaksi'); // tampilkan menu lengkap
   }else{
     $("loginMsg").innerText="❌ Username atau password salah!";
   }
 }
 function doLogout(){
-  // kembali ke view login (rapi)
+  // kembali ke login (rapi)
   $("appView").classList.add("hidden");
   $("loginView").classList.remove("hidden");
-  $("loginUser").value=""; $("loginPass").value="";
-  $("loginMsg").innerText="";
+  $("loginUser").value=""; $("loginPass").value=""; $("loginMsg").innerText="";
 }
 
 /* =============== Boot & Tabs =============== */
 function boot(){
   $("trxDate").value = todayISO();
-  $("kDate").value = todayISO();
+  $("kDate").value   = todayISO();
   loadBarangSelect(); renderCart(); renderStok(); renderLaporan(); renderKeuangan();
 }
 function showTab(tab){
@@ -441,9 +432,6 @@ function keuHapus(id){
   if(!confirm("Hapus data ini?")) return;
   keu = keu.filter(x=>x.id!==id); saveKeu(); renderKeuangan();
 }
-
-// init default
-document.addEventListener("DOMContentLoaded", ()=>{ /* tunggu login */ });
 </script>
 </body>
 </html>
