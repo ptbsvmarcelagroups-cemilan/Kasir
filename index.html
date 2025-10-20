@@ -1,40 +1,29 @@
 <!DOCTYPE html>
 <html lang="id">
-<!-- PWA Manifest -->
-<link rel="manifest" href="manifest.json">
-
-<!-- Theme color (warna status bar Android) -->
-<meta name="theme-color" content="#0ea5e9">
-
-<!-- Daftarkan Service Worker -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js')
-      .then(reg => console.log('✅ Service Worker terdaftar:', reg))
-      .catch(err => console.error('Gagal daftar Service Worker:', err));
-    });
-  }
-</script>
-
-  <head>
+<head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Kasir PT. BSV Marcela Groups – v2.2 PRO (Final)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kasir PT. BSV Marcela Groups – v2.2 Final</title>
 
-  <!-- ✅ Anti Cache — agar versi terbaru langsung tampil tanpa ?v=... -->
+  <!-- ✅ Anti-cache agar selalu versi terbaru tanpa ?v= -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+
+  <!-- ✅ Loader untuk PWA (manifest + service worker) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0ea5e9">
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(regs) {
-        for (let reg of regs) { reg.unregister(); }
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => console.log('✅ Service Worker aktif:', reg.scope))
+          .catch(err => console.log('❌ Gagal SW', err));
       });
     }
   </script>
 
-  <!-- ✅ Styling -->
+  <!-- ✅ STYLE (warna dark+biru khas BSV) -->
   <style>
     :root {
       --bg: #0f172a;
@@ -45,62 +34,53 @@
       --border: #334155;
     }
     body { font-family: Arial, sans-serif; background: var(--bg); color: #e5e7eb; margin: 0; }
-    header { background: var(--accent); padding: 15px; text-align: center; font-weight: bold; color: white; }
-    .container { max-width: 1080px; margin: auto; padding: 18px; }
-    .card { background: var(--card); padding: 20px; margin-top: 18px; border-radius: 12px; }
-    .nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
-    .nav button { background: #1f2937; color: #e5e7eb; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; cursor: pointer; }
-    .nav button.active { background: var(--btn); color: #001a25; font-weight: bold; }
-    input, select, button { width: 100%; padding: 10px; margin-top: 6px; border: none; border-radius: 8px; }
+    header { background: var(--accent); padding: 14px; text-align: center; color: white; font-weight: bold; }
+    .container { max-width: 1080px; margin: 0 auto; padding: 18px; }
+    .card { background: var(--card); padding: 18px; border-radius: 12px; margin-top: 18px; }
+    input, select, button { width: 100%; padding: 10px; margin: 6px 0; border: none; border-radius: 8px; }
     input, select { background: #e2e8f0; color: #000; }
-    button.primary { background: var(--btn); color: #002133; font-weight: bold; cursor: pointer; }
+    button.primary { background: var(--btn); color: #002133; font-weight: 600; cursor: pointer; }
     button.primary:hover { background: var(--accent); }
-    button.danger { background: #ef4444; color: #fff; }
+    button.danger { background: #ef4444; color: white; }
     button.danger:hover { background: #dc2626; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border-bottom: 1px solid var(--border); padding: 8px; text-align: left; }
+    th, td { border-bottom: 1px solid var(--border); padding: 8px; }
     th { background: #1e293b; }
-    .right { text-align: right; }
-    .center { text-align: center; }
-    .muted { color: var(--muted); }
     .hidden { display: none; }
   </style>
 </head>
 <body>
 
-<header>💼 PT. BSV Marcela Groups – Kasir Online Nanga Pinoh (v2.2 PRO)</header>
+<header>💼 PT. BSV Marcela Groups – Kasir Online (v2.2 Final)</header>
 <div class="container">
 
   <!-- ✅ LOGIN -->
   <div id="login" class="card">
     <h3>🔐 Login</h3>
-    <input id="username" placeholder="Username (admin)">
+    <input id="username" placeholder="Username (default: admin)">
     <input id="password" type="password" placeholder="Password (admin123)">
     <button class="primary" onclick="login()">Masuk</button>
     <p id="msg" style="color:#f87171"></p>
   </div>
 
-  <!-- ✅ APLIKASI -->
+  <!-- ✅ APP MULAI -->
   <div id="app" class="hidden">
     <h2 id="welcome"></h2>
-
-    <!-- Navigasi -->
     <div class="nav">
       <button id="tab-pos" class="active" onclick="showTab('pos')">🛒 Transaksi</button>
       <button id="tab-stok" onclick="showTab('stok')">📦 Stok</button>
       <button id="tab-lap" onclick="showTab('lap')">📈 Laporan</button>
-      <button id="tab-keu" onclick="showTab('keu')">💸 Pemasukan/Pengeluaran</button>
+      <button id="tab-keu" onclick="showTab('keu')">💸 Pemasukan-Pengeluaran</button>
       <button id="tab-user" onclick="showTab('user')">👥 User</button>
       <button class="danger" style="margin-left:auto" onclick="logout()">Logout</button>
     </div>
 
-    <!-- Seksi Transaksi -->
+    <!-- ✅ Mulai halaman transaksi -->
     <div id="sec-pos" class="card">
       <h3>🛒 Transaksi Penjualan</h3>
       <select id="barang"></select>
       <input id="qty" type="number" value="1" min="1">
-      <button class="primary" onclick="tambah()">Tambah ke Keranjang</button>
-
+      <button class="primary" onclick="tambah()">Tambah</button>
       <table>
         <thead>
           <tr>
@@ -122,126 +102,116 @@
       </table>
 
       <label class="muted">📅 Tanggal Transaksi</label>
-      <input type="date" id="tglTransaksi" />
+      <input type="date" id="tglTransaksi">
       <button class="primary" onclick="simpan()">Simpan & Cetak Nota</button>
     </div>
-    <!-- Seksi Stok -->
+
+    <!-- ✅ STOK -->
     <div id="sec-stok" class="card hidden">
       <h3>📦 Stok Barang</h3>
       <div id="stok"></div>
 
-      <h4 style="margin-top:14px">Tambah Barang Baru</h4>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-        <input id="namaBarang" placeholder="Nama Barang">
-        <input id="hargaBeli" type="number" placeholder="Harga Beli (modal)">
-        <input id="hargaJual" type="number" placeholder="Harga Jual">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <input id="stokBarang" type="number" placeholder="Stok">
-        <button class="primary" onclick="tambahBarang()">Tambah Barang</button>
-      </div>
-      <p class="muted">* Klik nilai harga/stok di tabel untuk edit cepat. Harga beli untuk internal admin.</p>
+      <h4>Tambah Barang</h4>
+      <input id="namaBarang" placeholder="Nama Barang">
+      <input id="hargaBeli" type="number" placeholder="Harga Beli">
+      <input id="hargaJual" type="number" placeholder="Harga Jual">
+      <input id="stokBarang" type="number" placeholder="Stok">
+      <button class="primary" onclick="tambahBarang()">Tambah</button>
     </div>
 
-    <!-- Seksi Laporan -->
+    <!-- ✅ LAPORAN PENJUALAN -->
     <div id="sec-lap" class="card hidden">
-      <h3>📈 Laporan Ringkas Harian</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-        <div>
-          <label>Filter tanggal</label>
-          <input type="date" id="filterTanggalLap">
-        </div>
-        <div>
-          <label>Filter bulan</label>
-          <input type="month" id="filterBulanLap">
-        </div>
-        <div style="display:flex;gap:8px;align-items:end">
-          <button onclick="tampilLaporan()">Tampilkan Semua</button>
-          <button class="primary" onclick="filterLaporan()">Filter</button>
-        </div>
-      </div>
+      <h3>📈 Laporan Penjualan</h3>
+
+      <label>Filter Tanggal</label>
+      <input type="date" id="filterTanggalLap">
+      <label>Filter Bulan</label>
+      <input type="month" id="filterBulanLap">
+      <button onclick="tampilLaporan()">Tampilkan Semua</button>
+      <button class="primary" onclick="filterLaporan()">Filter</button>
+
       <div id="laporan" style="margin-top:10px"></div>
       <div id="ringkas" class="muted" style="margin-top:8px"></div>
     </div>
 
-    <!-- Seksi Keuangan -->
+    <!-- ✅ PEMASUKAN PENGELUARAN -->
     <div id="sec-keu" class="card hidden">
       <h3>💸 Pemasukan & Pengeluaran</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-        <input type="date" id="keuTanggal">
-        <select id="keuJenis">
-          <option value="pemasukan">Pemasukan</option>
-          <option value="pengeluaran">Pengeluaran</option>
-        </select>
-        <input id="keuKet" placeholder="Keterangan (contoh: Beli minyak / Penjualan Harian)">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <input type="number" id="keuNominal" placeholder="Nominal">
-        <button class="primary" onclick="keuTambah()">Tambah</button>
-      </div>
+      <input type="date" id="keuTanggal">
+      <select id="keuJenis">
+        <option value="pemasukan">Pemasukan</option>
+        <option value="pengeluaran">Pengeluaran</option>
+      </select>
+      <input id="keuKet" placeholder="Keterangan">
+      <input type="number" id="keuNominal" placeholder="Nominal">
+      <button class="primary" onclick="keuTambah()">Tambah</button>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:8px">
-        <div>
-          <label>Filter tanggal</label>
-          <input type="date" id="keuFilterTanggal">
-        </div>
-        <div>
-          <label>Filter bulan</label>
-          <input type="month" id="keuFilterBulan">
-        </div>
-        <div style="display:flex;gap:8px;align-items:end">
-          <button onclick="keuTampil()">Tampilkan Semua</button>
-          <button class="primary" onclick="keuFilter()">Filter</button>
-        </div>
-      </div>
+      <label>Filter Tanggal</label>
+      <input type="date" id="keuFilterTanggal">
+      <label>Filter Bulan</label>
+      <input type="month" id="keuFilterBulan">
+      <button onclick="keuTampil()">Semua</button>
+      <button class="primary" onclick="keuFilter()">Filter</button>
 
       <div id="keuTabel" style="margin-top:10px"></div>
       <div id="keuRingkas" class="muted" style="margin-top:8px"></div>
     </div>
 
-    <!-- Seksi User -->
+    <!-- ✅ USER -->
     <div id="sec-user" class="card hidden">
-      <h3>👥 Manajemen User (Admin)</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-        <input id="userNewName" placeholder="Username baru">
-        <input id="userNewPass" placeholder="Password baru">
-        <button class="primary" onclick="userAdd()">Tambah User</button>
-      </div>
+      <h3>👥 Manajemen User</h3>
+      <input id="userNewName" placeholder="Username baru">
+      <input id="userNewPass" placeholder="Password baru">
+      <button class="primary" onclick="userAdd()">Tambah User</button>
       <div id="userTable" style="margin-top:10px"></div>
-      <p class="muted">* Semua user dianggap Admin (akses penuh).</p>
     </div>
 
-  </div><!-- /#app -->
-</div><!-- /.container -->
+  </div> <!-- /app -->
+</div> <!-- /container -->
 
 <footer style="text-align:center;margin:20px" class="muted">© 2025 PT. BSV Marcela Groups</footer>
 
-<!-- =========================
-     SCRIPT APLIKASI
-========================= -->
+<!-- ✅ SCRIPT JAVASCRIPT -->
 <script>
-/* ===== Utilities ===== */
-const $=id=>document.getElementById(id);
-const fmtID=n=>new Intl.NumberFormat('id-ID').format(n||0);
-const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-const toDMY=iso=>{const [y,m,d]=iso.split('-');return `${d}/${m}/${y}`;}
-const uuid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
+const $ = id => document.getElementById(id);
+const fmtID = n => new Intl.NumberFormat('id-ID').format(n || 0);
+const todayISO = () => {
+  const d = new Date();
+  return \`\${d.getFullYear()}-\${String(d.getMonth()+1).padStart(2,'0')}-\${String(d.getDate()).padStart(2,'0')}\`;
+};
+const toDMY = iso => {
+  const [y,m,d] = iso.split('-');
+  return \`\${d}/\${m}/\${y}\`;
+};
+const uuid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
-/* ===== Storage Keys ===== */
-const K_USERS='bsv_users';
-const K_BARANG='bsv_barang';
-const K_LAP='bsv_laporan_v2';    // {tgl, jam, total, laba, items[]}
-const K_KEU='bsv_keu_v22';       // {id,tgl,jenis,ket,nominal}
+let USERS = JSON.parse(localStorage.getItem('bsv_users')) || [{username:'admin',password:'admin123'}];
+let barangList = JSON.parse(localStorage.getItem('bsv_barang')) || [];
+let laporan = JSON.parse(localStorage.getItem('bsv_laporan_v2')) || [];
+let keu = JSON.parse(localStorage.getItem('bsv_keu_v22')) || [];
+let keranjang = [];
+let SESSION = null;
 
-/* ===== State ===== */
-let USERS=JSON.parse(localStorage.getItem(K_USERS))||[{username:'admin',password:'admin123'}];
-let barangList=JSON.parse(localStorage.getItem(K_BARANG))||[];
-let laporan=JSON.parse(localStorage.getItem(K_LAP))||[];
-let keu=JSON.parse(localStorage.getItem(K_KEU))||[];
-let keranjang=[];
-let SESSION=null;
+const saveUsers = () => localStorage.setItem('bsv_users',JSON.stringify(USERS));
+const saveBarang = () => localStorage.setItem('bsv_barang',JSON.stringify(barangList));
+const saveLap = () => localStorage.setItem('bsv_laporan_v2',JSON.stringify(laporan));
+const saveKeu = () => localStorage.setItem('bsv_keu_v22',JSON.stringify(keu));
 
-/* ===== Tabs ===== */
+function login(){
+  const u = $('username').value.trim();
+  const p = $('password').value.trim();
+  const user = USERS.find(x=>x.username===u && x.password===p);
+  if(!user){ $('msg').innerText = 'Username atau password salah'; return; }
+  SESSION = {username: u};
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('welcome').innerText = '👋 Selamat datang, ' + u.toUpperCase();
+  $('tglTransaksi').value = todayISO();
+  tampilBarang(); tampilStok(); tampilLaporan(); keuTampil(); userRender();
+}
+
+function logout(){ location.reload(); }
+
 function showTab(name){
   ['pos','stok','lap','keu','user'].forEach(n=>{
     $('sec-'+n).classList.toggle('hidden', n!==name);
@@ -249,297 +219,206 @@ function showTab(name){
   });
 }
 
-/* ===== Saves ===== */
-const saveUsers=()=>localStorage.setItem(K_USERS,JSON.stringify(USERS));
-const saveBarang=()=>localStorage.setItem(K_BARANG,JSON.stringify(barangList));
-const saveLap=()=>localStorage.setItem(K_LAP,JSON.stringify(laporan));
-const saveKeu=()=>localStorage.setItem(K_KEU,JSON.stringify(keu));
-
-/* ===== Auth ===== */
-function login(){
-  const u=$('username').value.trim();
-  const p=$('password').value.trim();
-  const ok=USERS.find(x=>x.username===u && x.password===p);
-  if(!ok){ $('msg').innerText='Username / password salah!'; return; }
-  SESSION={username:u};
-  $('login').classList.add('hidden');
-  $('app').classList.remove('hidden');
-  $('welcome').innerText='👋 Selamat datang, '+u.toUpperCase();
-  initAfterLogin();
-}
-function logout(){ location.reload(); }
-
-function initAfterLogin(){
-  // tanggal transaksi default
-  $('tglTransaksi').value=todayISO();
-  // tampil data
-  tampilBarang(); tampilStok(); tampilLaporan(); keuTampil(); userRender();
-}
-
-/* ===== POS ===== */
+/* === Transaksi === */
 function tampilBarang(){
-  const sel=$('barang'); sel.innerHTML='';
-  if(!barangList.length){ sel.innerHTML='<option>(Belum ada barang)</option>'; return; }
+  const sel = $('barang'); sel.innerHTML = '';
   barangList.forEach((b,i)=>{
-    const o=document.createElement('option');
-    o.value=i; o.textContent=`${b.nama} — Rp${fmtID(b.harga||0)} (Stok ${b.stok||0})`;
-    sel.appendChild(o);
+    sel.innerHTML += \`<option value="\${i}">\${b.nama} - Rp\${fmtID(b.harga)} (Stok \${b.stok})</option>\`;
   });
 }
+
 function tambah(){
-  if(!barangList.length) return alert('Belum ada barang di stok!');
-  const i=parseInt($('barang').value||'0');
-  const q=Math.max(1,parseInt($('qty').value||'1'));
-  const b=barangList[i]; if(!b) return;
-  if((b.stok||0) < q) return alert('Stok tidak cukup!');
-  b.stok = (b.stok||0) - q;
-  keranjang.push({nama:b.nama,hbeli:b.hbeli||0,harga:b.harga||0,qty:q,total:(b.harga||0)*q});
-  saveBarang();
-  renderKeranjang(); tampilBarang(); tampilStok();
-}
-function renderKeranjang(){
-  const tb=$('keranjang'); tb.innerHTML=''; let sub=0;
-  keranjang.forEach((k,i)=>{
-    sub+=k.total;
-    tb.innerHTML+=`<tr>
-      <td>${k.nama}</td><td class="center">${k.qty}</td>
-      <td class="right">Rp${fmtID(k.harga)}</td><td class="right">Rp${fmtID(k.total)}</td>
-      <td><button class="danger" onclick="hapusItem(${i})">x</button></td>
-    </tr>`;
+  const idx = $('barang').value;
+  if(idx === null) return;
+  const qty = parseInt($('qty').value);
+  const b = barangList[idx];
+  if(b.stok < qty) return alert('Stok tidak cukup!');
+  b.stok -= qty;
+  keranjang.push({
+    nama: b.nama,
+    hbeli: b.hbeli || 0,
+    harga: b.harga,
+    qty,
+    total: b.harga * qty
   });
-  $('subtotal').innerText='Rp'+fmtID(sub);
+  saveBarang();
+  renderKeranjang(); tampilBarang();
 }
-function hapusItem(idx){
-  const row=keranjang[idx];
-  const b=barangList.find(x=>x.nama===row.nama);
-  if(b) b.stok=(b.stok||0)+row.qty;
-  keranjang.splice(idx,1);
-  saveBarang(); renderKeranjang(); tampilStok(); tampilBarang();
+
+function renderKeranjang(){
+  $('keranjang').innerHTML = '';
+  let total = 0;
+  keranjang.forEach((k,i)=>{
+    total += k.total;
+    $('keranjang').innerHTML += \`
+      <tr>
+        <td>\${k.nama}</td>
+        <td class="center">\${k.qty}</td>
+        <td class="right">Rp\${fmtID(k.harga)}</td>
+        <td class="right">Rp\${fmtID(k.total)}</td>
+        <td><button class="danger" onclick="hapusItem(\${i})">x</button></td>
+      </tr>\`;
+  });
+  $('subtotal').innerText = 'Rp' + fmtID(total);
 }
+
+function hapusItem(i){
+  const row = keranjang[i];
+  const b = barangList.find(x=>x.nama===row.nama);
+  if(b) b.stok += row.qty;
+  keranjang.splice(i,1);
+  saveBarang(); renderKeranjang(); tampilBarang();
+}
+
 function simpan(){
   if(!keranjang.length) return alert('Keranjang kosong!');
-  const iso=$('tglTransaksi').value||todayISO();
-  const tgl=toDMY(iso);
-  const jam=new Date().toLocaleTimeString('id-ID');
+  const iso = $('tglTransaksi').value || todayISO();
+  const tgl = toDMY(iso);
+  const jam = new Date().toLocaleTimeString('id-ID');
 
-  let subtotal=0, laba=0;
-  keranjang.forEach(k=>{ subtotal+=k.total; laba+=((k.harga||0)-(k.hbeli||0))*k.qty; });
+  let total = 0, laba = 0;
+  keranjang.forEach(k=>{
+    total += k.total;
+    laba += (k.harga - k.hbeli) * k.qty;
+  });
 
-  // simpan laporan transaksi
-  laporan.push({tgl,jam,total:subtotal,laba,items:keranjang});
+  laporan.push({tgl, jam, total, laba, items: keranjang});
   saveLap();
 
-  // catat pemasukan otomatis ke Keuangan
-  keu.push({id:uuid(),tgl,jenis:'pemasukan',ket:'Penjualan Harian',nominal:subtotal});
+  keu.push({id: uuid(), tgl, jenis:'pemasukan', ket:'Penjualan Harian', nominal: total});
   saveKeu();
 
-  // reset
-  keranjang=[]; renderKeranjang();
-  alert('Transaksi disimpan!');
-  cetakNota(tgl,jam,subtotal);
-  tampilLaporan(); keuTampil();
-}
-function cetakNota(tgl,jam,total){
-  const w=window.open('','nota','width=380,height=600');
-  w.document.write(`<pre>🧾 PT. BSV Marcela Groups
-Tanggal: ${tgl} • Jam: ${jam}
------------------
-Total: Rp${fmtID(total)}
-Terima kasih 🙏</pre>`); w.print();
+  keranjang = [];
+  renderKeranjang(); tampilLaporan(); keuTampil();
+  alert('Transaksi berhasil!');
 }
 
-/* ===== STOK ===== */
+/* === Stok === */
 function tampilStok(){
-  const box=$('stok');
-  if(!barangList.length){ box.innerHTML='<p>Belum ada barang, tambahkan di bawah.</p>'; return; }
-  let html=`<table><thead><tr>
-    <th>Nama</th><th class="right">Harga Beli</th><th class="right">Harga Jual</th><th class="center">Stok</th><th>Aksi</th>
-  </tr></thead><tbody>`;
+  let html = '<table><tr><th>Barang</th><th>Beli</th><th>Jual</th><th>Stok</th><th>Aksi</th></tr>';
   barangList.forEach((b,i)=>{
-    html+=`<tr>
-      <td>${b.nama}</td>
-      <td class="right editable" onclick="editHbeli(${i})">Rp${fmtID(b.hbeli||0)}</td>
-      <td class="right editable" onclick="editHjual(${i})">Rp${fmtID(b.harga||0)}</td>
-      <td class="center editable" onclick="editStok(${i})">${b.stok||0}</td>
-      <td><button class="danger" onclick="hapusBarang(${i})">Hapus</button></td>
-    </tr>`;
+    html += \`<tr>
+      <td>\${b.nama}</td>
+      <td class="right">\${fmtID(b.hbeli || 0)}</td>
+      <td class="right">\${fmtID(b.harga)}</td>
+      <td class="center">\${b.stok}</td>
+      <td><button class="danger" onclick="hapusBarang(\${i})">Hapus</button></td>
+    </tr>\`;
   });
-  html+='</tbody></table>';
-  box.innerHTML=html;
+  html += '</table>';
+  $('stok').innerHTML = html;
 }
+
 function tambahBarang(){
-  const nama=$('namaBarang').value.trim();
-  const hbeli=parseInt($('hargaBeli').value||'0');
-  const hjual=parseInt($('hargaJual').value||'0');
-  const stok=parseInt($('stokBarang').value||'0');
-  if(!nama) return alert('Nama barang wajib diisi.');
-  barangList.push({nama,hbeli:isNaN(hbeli)?0:hbeli,harga:isNaN(hjual)?0:hjual,stok:isNaN(stok)?0:stok});
+  const nama = $('namaBarang').value;
+  const hbeli = parseInt($('hargaBeli').value||0);
+  const harga = parseInt($('hargaJual').value||0);
+  const stok = parseInt($('stokBarang').value||0);
+  if(!nama) return alert('Nama barang kosong');
+  barangList.push({nama, hbeli, harga, stok});
   saveBarang();
-  $('namaBarang').value=$('hargaBeli').value=$('hargaJual').value=$('stokBarang').value='';
+  $('namaBarang').value = $('hargaBeli').value = $('hargaJual').value = $('stokBarang').value = '';
   tampilBarang(); tampilStok();
 }
-function editHbeli(i){ const v=prompt('Harga BELI baru:', barangList[i].hbeli||0); if(v===null)return; const x=parseInt(v); if(!isNaN(x)){barangList[i].hbeli=x; saveBarang(); tampilStok();}}
-function editHjual(i){ const v=prompt('Harga JUAL baru:', barangList[i].harga||0); if(v===null)return; const x=parseInt(v); if(!isNaN(x)){barangList[i].harga=x; saveBarang(); tampilStok(); tampilBarang();}}
-function editStok(i){ const v=prompt('STOK baru:', barangList[i].stok||0); if(v===null)return; const x=parseInt(v); if(!isNaN(x)){barangList[i].stok=x; saveBarang(); tampilStok(); tampilBarang();}}
-function hapusBarang(i){ if(!confirm('Hapus barang ini?'))return; barangList.splice(i,1); saveBarang(); tampilStok(); tampilBarang(); }
 
-/* ===== LAPORAN ===== */
-function tampilLaporan(data=laporan){
-  const box=$('laporan'), sum=$('ringkas');
-  if(!data.length){ box.innerHTML='<p>Belum ada laporan.</p>'; sum.innerHTML=''; return; }
-
-  // rekap harian
-  const map={};
-  data.forEach(r=>{
-    if(!map[r.tgl]) map[r.tgl]={total:0,laba:0};
-    map[r.tgl].total+=(r.total||0);
-    map[r.tgl].laba+=(r.laba||0);
-  });
-
-  const dates=Object.keys(map).sort((a,b)=>{
-    const [ad,am,ay]=a.split('/').map(Number);
-    const [bd,bm,by]=b.split('/').map(Number);
-    return new Date(by,bm-1,bd)-new Date(ay,am-1,ad);
-  });
-
-  let html=`<table><thead><tr>
-    <th>Tanggal</th><th class="right">Total Penjualan</th><th class="right">Total Laba</th><th class="center">Aksi</th>
-  </tr></thead><tbody>`;
-  dates.forEach(t=>{
-    html+=`<tr>
-      <td>${t}</td>
-      <td class="right">Rp${fmtID(map[t].total)}</td>
-      <td class="right">Rp${fmtID(map[t].laba)}</td>
-      <td class="center"><button class="danger" onclick="hapusLaporanTanggal('${t}')">🗑️ Hapus</button></td>
-    </tr>`;
-  });
-  html+='</tbody></table>';
-  box.innerHTML=html;
-
-  const grandT=data.reduce((a,b)=>a+(b.total||0),0);
-  const grandL=data.reduce((a,b)=>a+(b.laba||0),0);
-  sum.innerHTML=`Total Penjualan (tampilan ini): <b>Rp${fmtID(grandT)}</b> • Total Laba: <b>Rp${fmtID(grandL)}</b>`;
-}
-function hapusLaporanTanggal(tgl){
-  if(!confirm('Hapus semua transaksi pada tanggal '+tgl+' ?')) return;
-  laporan=laporan.filter(r=>r.tgl!==tgl);
-  saveLap(); tampilLaporan();
-  // hapus pemasukan otomatis tanggal tsb (Penjualan Harian)
-  const before=keu.length;
-  keu=keu.filter(e=>!(e.tgl===tgl && e.jenis==='pemasukan' && e.ket==='Penjualan Harian'));
-  if(keu.length!==before) saveKeu();
-}
-function filterLaporan(){
-  const dt=$('filterTanggalLap').value; // yyyy-mm-dd
-  const mo=$('filterBulanLap').value;   // yyyy-mm
-  let data=laporan;
-  if(dt){
-    const t=toDMY(dt); data=data.filter(x=>x.tgl===t);
-  }else if(mo){
-    const [y,m]=mo.split('-'); data=data.filter(x=>{const [,mm,yy]=x.tgl.split('/'); return yy===y && mm===m;});
+function hapusBarang(i){
+  if(confirm('Hapus barang ini?')){
+    barangList.splice(i,1);
+    saveBarang(); tampilStok(); tampilBarang();
   }
-  tampilLaporan(data);
 }
 
-/* ===== KEUANGAN ===== */
+/* === Laporan === */
+function tampilLaporan(data=laporan){
+  let html = '<table><tr><th>Tanggal</th><th>Total</th><th>Laba</th><th>Aksi</th></tr>';
+  let total = 0, laba = 0;
+  data.forEach(r=>{
+    total += r.total; laba += r.laba;
+    html += \`<tr>
+      <td>\${r.tgl}</td>
+      <td class="right">Rp\${fmtID(r.total)}</td>
+      <td class="right">Rp\${fmtID(r.laba)}</td>
+      <td><button class="danger" onclick="hapusLap('\${r.tgl}')">Hapus</button></td>
+    </tr>\`;
+  });
+  html += '</table>';
+  $('laporan').innerHTML = html;
+  $('ringkas').innerHTML = \`Total: Rp\${fmtID(total)} | Laba: Rp\${fmtID(laba)}\`;
+}
+
+function filterLaporan(){
+  const t = $('filterTanggalLap').value;
+  const b = $('filterBulanLap').value;
+  if(t){
+    tampilLaporan(laporan.filter(x=>x.tgl===toDMY(t)));
+  } else if(b){
+    const [yy,mm] = b.split('-');
+    tampilLaporan(laporan.filter(x=>x.tgl.endsWith(\`\${mm}/\${yy}\`)));
+  }
+}
+
+function hapusLap(tgl){
+  if(confirm('Hapus semua transaksi tanggal '+tgl+'?')){
+    laporan = laporan.filter(r=>r.tgl!==tgl);
+    saveLap(); tampilLaporan();
+  }
+}
+
+/* === Keuangan === */
 function keuTampil(data=keu){
-  const box=$('keuTabel'), sum=$('keuRingkas');
-  if(!data.length){ box.innerHTML='<p>Belum ada data keuangan.</p>'; sum.innerHTML=''; return; }
-
-  const rows=data.slice().sort((a,b)=>{
-    const [ad,am,ay]=a.tgl.split('/').map(Number);
-    const [bd,bm,by]=b.tgl.split('/').map(Number);
-    return new Date(by,bm-1,bd)-new Date(ay,am-1,ad);
-  }).map(e=>`<tr>
-      <td>${e.tgl}</td>
-      <td>${e.ket}</td>
-      <td class="${e.jenis==='pemasukan'?'':'muted'}">${e.jenis.toUpperCase()}</td>
-      <td class="right">Rp${fmtID(e.nominal||0)}</td>
-      <td class="center">
-        <button onclick="keuEdit('${e.id}')">✏</button>
-        <button class="danger" onclick="keuHapus('${e.id}')">🗑</button>
-      </td>
-    </tr>`).join('');
-
-  box.innerHTML=`<table>
-    <thead><tr><th>Tanggal</th><th>Keterangan</th><th>Jenis</th><th class="right">Nominal</th><th class="center">Aksi</th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
-
-  const pemasukan=data.filter(x=>x.jenis==='pemasukan').reduce((a,b)=>a+(b.nominal||0),0);
-  const pengeluaran=data.filter(x=>x.jenis==='pengeluaran').reduce((a,b)=>a+(b.nominal||0),0);
-  const saldo=pemasukan-pengeluaran;
-  sum.innerHTML=`Total Pemasukan: <b>Rp${fmtID(pemasukan)}</b> • Total Pengeluaran: <b>Rp${fmtID(pengeluaran)}</b> • Saldo: <b>Rp${fmtID(saldo)}</b>`;
+  let html = '<table><tr><th>Tgl</th><th>Ket</th><th>Jenis</th><th>Nominal</th><th>Aksi</th></tr>', inTotal=0,outTotal=0;
+  data.forEach(item=>{
+    html += \`<tr>
+      <td>\${item.tgl}</td>
+      <td>\${item.ket}</td>
+      <td>\${item.jenis}</td>
+      <td class="right">Rp\${fmtID(item.nominal)}</td>
+      <td><button class="danger" onclick="keuDel('\${item.id}')">x</button></td>
+    </tr>\`;
+    if(item.jenis==='pemasukan') inTotal+=item.nominal; else outTotal+=item.nominal;
+  });
+  html += '</table>';
+  $('keuTabel').innerHTML = html;
+  $('keuRingkas').innerHTML = \`Pemasukan: Rp\${fmtID(inTotal)} | Pengeluaran: Rp\${fmtID(outTotal)} | Saldo: Rp\${fmtID(inTotal-outTotal)}\`;
 }
+
 function keuTambah(){
-  const iso=$('keuTanggal').value||todayISO();
-  const tgl=toDMY(iso);
-  const jenis=$('keuJenis').value;
-  const ket=$('keuKet').value.trim()|| (jenis==='pemasukan'?'Pemasukan Lain-lain':'Pengeluaran');
-  const nominal=parseInt($('keuNominal').value||'0');
-  if(!nominal||nominal<0) return alert('Nominal tidak valid.');
-  keu.push({id:uuid(),tgl,jenis,ket,nominal});
-  saveKeu();
-  $('keuKet').value=$('keuNominal').value='';
-  keuTampil();
-}
-function keuEdit(id){
-  const e=keu.find(x=>x.id===id); if(!e) return;
-  const tgl=prompt('Tanggal (dd/mm/yyyy):', e.tgl); if(tgl===null) return;
-  const ket=prompt('Keterangan:', e.ket); if(ket===null) return;
-  const jenis=prompt('Jenis (pemasukan/pengeluaran):', e.jenis); if(jenis===null) return;
-  const nominal=parseInt(prompt('Nominal:', e.nominal)); if(isNaN(nominal)) return;
-  Object.assign(e,{tgl,ket,jenis:jenis.toLowerCase()==='pengeluaran'?'pengeluaran':'pemasukan',nominal});
+  const iso = $('keuTanggal').value || todayISO();
+  keu.push({
+    id: uuid(),
+    tgl: toDMY(iso),
+    jenis: $('keuJenis').value,
+    ket: $('keuKet').value || '-',
+    nominal: parseInt($('keuNominal').value)
+  });
   saveKeu(); keuTampil();
 }
-function keuHapus(id){
-  if(!confirm('Hapus entri ini?')) return;
-  keu=keu.filter(x=>x.id!==id); saveKeu(); keuTampil();
-}
-function keuFilter(){
-  const dt=$('keuFilterTanggal').value; // yyyy-mm-dd
-  const mo=$('keuFilterBulan').value;   // yyyy-mm
-  let data=keu;
-  if(dt){
-    const t=toDMY(dt); data=data.filter(x=>x.tgl===t);
-  }else if(mo){
-    const [y,m]=mo.split('-'); data=data.filter(x=>{const [,mm,yy]=x.tgl.split('/'); return yy===y && mm===m;});
-  }
-  keuTampil(data);
+
+/* === User Management === */
+function userRender(){
+  let html = '<table><tr><th>User</th><th>Aksi</th></tr>';
+  USERS.forEach(u=>{
+    html += \`<tr>
+      <td>\${u.username}</td>
+      <td>
+        ${"`"}<button onclick="userDel('\${u.username}')">Hapus</button>${"`"}
+      </td>
+    </tr>\`;
+  });
+  html += '</table>';
+  $('userTable').innerHTML = html;
 }
 
-/* ===== USERS ===== */
-function userRender(){
-  let rows=USERS.map(u=>`
-    <tr>
-      <td>${u.username}</td>
-      <td class="center">
-        <button onclick="userPass('${u.username}')">Ganti Password</button>
-        ${u.username==='admin'?'':`<button class="danger" onclick="userDel('${u.username}')">Hapus</button>`}
-      </td>
-    </tr>`).join('');
-  $('userTable').innerHTML=`<table>
-    <thead><tr><th>Username</th><th class="center">Aksi</th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
-}
 function userAdd(){
-  const name=$('userNewName').value.trim();
-  const pass=$('userNewPass').value.trim();
-  if(!name||!pass) return alert('Isi username & password.');
-  if(USERS.find(u=>u.username===name)) return alert('Username sudah ada.');
-  USERS.push({username:name,password:pass}); saveUsers();
-  $('userNewName').value=$('userNewPass').value=''; userRender();
+  USERS.push({username: $('userNewName').value, password: $('userNewPass').value});
+  saveUsers(); userRender();
 }
-function userPass(username){
-  const u=USERS.find(x=>x.username===username); if(!u) return;
-  const p=prompt('Password baru untuk '+username+':',''); if(!p) return;
-  u.password=p; saveUsers(); alert('Password diperbarui.');
-}
-function userDel(username){
-  if(!confirm('Hapus user '+username+' ?')) return;
-  USERS=USERS.filter(u=>u.username!==username); saveUsers(); userRender();
+
+function userDel(u){
+  USERS = USERS.filter(x=>x.username!==u);
+  saveUsers(); userRender();
 }
 </script>
+
 </body>
 </html>
