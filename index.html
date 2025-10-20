@@ -1,655 +1,77 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kasir PT. BSV Marcela Groups – Final Web</title>
-
-  <!-- Hapus PWA & Cache -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Kasir BSV</title>
   <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1f2937;
-      --accent: #0ea5e9;
-      --btn: #38bdf8;
-      --border: #334155;
-      --muted: #94a3b8;
-    }
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: var(--bg);
-      color: #e5e7eb;
+      background: #0f172a;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       margin: 0;
     }
-    header {
-      background: var(--accent);
-      color: #fff;
+    .login-box {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 10px;
+      width: 320px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
       text-align: center;
-      padding: 12px;
-      font-weight: bold;
     }
-    .container {
-      max-width: 1080px;
-      margin: auto;
-      padding: 16px;
-    }
-    .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 18px;
-    }
-    input, select, button {
+    input {
       width: 100%;
       padding: 10px;
-      margin: 6px 0;
+      margin: 10px 0;
+      border-radius: 5px;
       border: none;
-      border-radius: 8px;
     }
-    input, select {
-      background: #e2e8f0;
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #38bdf8;
       color: #000;
-    }
-    button.primary {
-      background: var(--btn);
-      color: #002133;
       font-weight: bold;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
     }
-    button.primary:hover {
-      background: var(--accent);
-    }
-    button.danger {
-      background: #ef4444;
+    button:hover {
+      background: #0ea5e9;
       color: white;
     }
-    .nav {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-    .nav button {
-      padding: 8px 12px;
-      background:#1e293b;
-      border:1px solid var(--border);
-      border-radius: 8px;
-      cursor:pointer;
-      color:white;
-    }
-    .nav .active {
-      background: var(--btn);
-      color: #002133;
-    }
-    .hidden {display:none;}
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    .error {
+      color: #f87171;
       margin-top: 10px;
     }
-    th, td {
-      border-bottom: 1px solid var(--border);
-      padding: 8px;
-    }
-    th {background:#1e293b;}
-    .center {text-align:center;}
-    .right {text-align:right;}
-    .muted {color:var(--muted);}
   </style>
 </head>
 <body>
 
-<header>💼 PT. BSV Marcela Groups – Kasir Online</header>
+<div class="login-box">
+  <h2>🔐 Login Kasir BSV</h2>
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Masuk</button>
+  <p id="error" class="error"></p>
+</div>
 
-<div class="container">
-
-  <!-- LOGIN -->
-  <div id="login" class="card">
-    <h3>🔐 Login</h3>
-    <input id="username" placeholder="Username (admin)">
-    <input id="password" type="password" placeholder="Password (admin123)">
-    <button class="primary" onclick="login()">Masuk</button>
-    <p id="msg" style="color:#f87171"></p>
-  </div>
-
-  <!-- APLIKASI -->
-  <div id="app" class="hidden">
-    <h2 id="welcome">👋 Selamat datang</h2>
-
-    <!-- Navigasi Menu -->
-    <div class="nav">
-      <button id="tab-pos" class="active" onclick="showTab('pos')">🛒 Transaksi</button>
-      <button id="tab-stok" onclick="showTab('stok')">📦 Stok</button>
-      <button id="tab-lap" onclick="showTab('lap')">📈 Laporan</button>
-      <button id="tab-keu" onclick="showTab('keu')">💸 Keuangan</button>
-      <button id="tab-user" onclick="showTab('user')">👥 User</button>
-      <button class="danger" style="margin-left:auto" onclick="logout()">🚪 Logout</button>
-    </div>
-
-    <!-- =================== -->
-    <!-- 1) TRANSAKSI (POS) -->
-    <!-- =================== -->
-    <div id="sec-pos" class="card">
-      <h3>🛒 Transaksi Penjualan</h3>
-      <select id="barang"></select>
-      <input id="qty" type="number" value="1" min="1">
-      <button class="primary" onclick="tambah()">Tambah ke Keranjang</button>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Barang</th>
-            <th class="center">Qty</th>
-            <th class="right">Harga</th>
-            <th class="right">Total</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="keranjang"></tbody>
-        <tfoot>
-          <tr>
-            <th colspan="3" class="right">Subtotal</th>
-            <th id="subtotal" class="right">Rp0</th>
-            <th></th>
-          </tr>
-        </tfoot>
-      </table>
-
-      <label class="muted">📅 Tanggal Transaksi</label>
-      <input type="date" id="tglTransaksi">
-      <button class="primary" onclick="simpan()">Simpan & Cetak Nota</button>
-    </div>
-    <!-- =================== -->
-    <!-- 2) STOK BARANG     -->
-    <!-- =================== -->
-    <div id="sec-stok" class="card hidden">
-      <h3>📦 Stok Barang</h3>
-      <div id="stok"></div>
-
-      <h4>Tambah Barang Baru</h4>
-      <input id="namaBarang" placeholder="Nama Barang">
-      <input id="hargaBeli" type="number" placeholder="Harga Beli (Modal)">
-      <input id="hargaJual" type="number" placeholder="Harga Jual">
-      <input id="stokBarang" type="number" placeholder="Stok">
-      <button class="primary" onclick="tambahBarang()">Tambah Barang</button>
-      <p class="muted">* Klik harga/stok pada tabel untuk edit cepat.</p>
-    </div>
-
-    <!-- =================== -->
-    <!-- 3) LAPORAN          -->
-    <!-- =================== -->
-    <div id="sec-lap" class="card hidden">
-      <h3>📈 Laporan Penjualan Harian</h3>
-
-      <label>Filter Tanggal</label>
-      <input type="date" id="filterTanggalLap">
-
-      <label>Filter Bulan</label>
-      <input type="month" id="filterBulanLap">
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button onclick="tampilLaporan()">Tampilkan Semua</button>
-        <button class="primary" onclick="filterLaporan()">Filter</button>
-      </div>
-
-      <div id="laporan" style="margin-top:10px"></div>
-      <div id="ringkas" class="muted" style="margin-top:8px"></div>
-    </div>
-
-    <!-- ============================= -->
-    <!-- 4) PEMASUKAN / PENGELUARAN   -->
-    <!-- ============================= -->
-    <div id="sec-keu" class="card hidden">
-      <h3>💸 Pemasukan & Pengeluaran</h3>
-
-      <input type="date" id="keuTanggal">
-      <select id="keuJenis">
-        <option value="pemasukan">Pemasukan</option>
-        <option value="pengeluaran">Pengeluaran</option>
-      </select>
-      <input id="keuKet" placeholder="Keterangan (misal: Penjualan / Beli Solar)">
-      <input type="number" id="keuNominal" placeholder="Nominal">
-      <button class="primary" onclick="keuTambah()">Tambah</button>
-
-      <label>Filter Harian</label>
-      <input type="date" id="keuFilterTanggal">
-
-      <label>Filter Bulanan</label>
-      <input type="month" id="keuFilterBulan">
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button onclick="keuTampil()">Tampilkan Semua</button>
-        <button class="primary" onclick="keuFilter()">Filter</button>
-      </div>
-
-      <div id="keuTabel" style="margin-top:10px"></div>
-      <div id="keuRingkas" class="muted" style="margin-top:8px"></div>
-    </div>
-
-    <!-- =================== -->
-    <!-- 5) USER             -->
-    <!-- =================== -->
-    <div id="sec-user" class="card hidden">
-      <h3>👥 Manajemen User</h3>
-      <input id="userNewName" placeholder="Username baru">
-      <input id="userNewPass" placeholder="Password baru">
-      <button class="primary" onclick="userAdd()">Tambah User</button>
-
-      <div id="userTable" style="margin-top:10px"></div>
-      <p class="muted">Default: admin / admin123</p>
-    </div>
-
-  </div><!-- /app -->
-</div><!-- /container -->
-
-<footer style="text-align:center;margin:20px" class="muted">
-  © 2025 PT. BSV Marcela Groups
-</footer>
-
-<!-- ======== SCRIPT akan ditempatkan di Bagian 3 ======== -->
-<!-- =========================== -->
-<!--   JAVASCRIPT FUNGSI APP    -->
-<!-- =========================== -->
 <script>
-// ===== Utility =====
-const $ = id => document.getElementById(id);
-const fmt = n => new Intl.NumberFormat('id-ID').format(n || 0);
-const todayISO = () => new Date().toISOString().split('T')[0];
-const toDMY = iso => {
-  const [y, m, d] = iso.split('-');
-  return `${d}/${m}/${y}`;
-};
+  function login() {
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value.trim();
 
-// ===== Data LocalStorage =====
-let USERS = JSON.parse(localStorage.getItem("bsv_users")) || [
-  { username: "admin", password: "admin123" }
-];
-let barang = JSON.parse(localStorage.getItem("bsv_barang")) || [];
-let laporan = JSON.parse(localStorage.getItem("bsv_laporan")) || [];
-let keuangan = JSON.parse(localStorage.getItem("bsv_keuangan")) || [];
-let keranjang = [];
-
-function saveUsers() { localStorage.setItem("bsv_users", JSON.stringify(USERS)); }
-function saveBarang() { localStorage.setItem("bsv_barang", JSON.stringify(barang)); }
-function saveLaporan(){ localStorage.setItem("bsv_laporan", JSON.stringify(laporan)); }
-function saveKeuangan(){ localStorage.setItem("bsv_keuangan", JSON.stringify(keuangan)); }
-
-// ===== Login =====
-function login() {
-  const u = $("username").value.trim();
-  const p = $("password").value.trim();
-
-  const user = USERS.find(x => x.username === u && x.password === p);
-  if (!user) {
-    $("msg").innerText = "❌ Username atau password salah!";
-    return;
+    if (user === "admin" && pass === "admin123") {
+      // Berhasil login → pindah halaman
+      window.location.href = "home.html"; 
+    } else {
+      document.getElementById('error').innerText = "❌ Username atau password salah!";
+    }
   }
-
-  $("login").classList.add("hidden");
-  $("app").classList.remove("hidden");
-  $("welcome").innerText = "👋 Selamat datang, " + u.toUpperCase();
-
-  $("tglTransaksi").value = todayISO();
-  renderBarang(); renderStok(); tampilLaporan(); keuTampil(); renderUsers();
-}
-
-function logout() {
-  location.reload();
-}
-
-// ===== Navigasi =====
-function showTab(tab) {
-  ["pos", "stok", "lap", "keu", "user"].forEach(t => {
-    $("sec-" + t).classList.add("hidden");
-    $("tab-" + t).classList.remove("active");
-  });
-  $("sec-" + tab).classList.remove("hidden");
-  $("tab-" + tab).classList.add("active");
-}
-
-// ============================
-// 1. TRANSAKSI (POS)
-// ============================
-function renderBarang(){
-  const sel = $("barang");
-  sel.innerHTML = "";
-  if (!barang.length){
-    sel.innerHTML = "<option>(Belum ada barang)</option>";
-    return;
-  }
-  barang.forEach((b,i)=>{
-    sel.innerHTML += `<option value="${i}">${b.nama} - Rp${fmt(b.harga)} (Stok ${b.stok})</option>`;
-  });
-}
-
-function tambah(){
-  const i = $("barang").value;
-  const qty = parseInt($("qty").value);
-  if (!barang[i] || qty <= 0) return alert("Barang atau qty tidak valid!");
-  if (barang[i].stok < qty) return alert("Stok tidak cukup!");
-
-  barang[i].stok -= qty;
-  keranjang.push({
-    nama: barang[i].nama,
-    harga: barang[i].harga,
-    qty,
-    total: barang[i].harga * qty
-  });
-
-  saveBarang();
-  renderKeranjang(); renderBarang(); renderStok();
-}
-
-function renderKeranjang(){
-  $("keranjang").innerHTML = "";
-  let sub = 0;
-  keranjang.forEach((k,i)=>{
-    sub += k.total;
-    $("keranjang").innerHTML += `
-      <tr>
-        <td>${k.nama}</td>
-        <td class="center">${k.qty}</td>
-        <td class="right">Rp${fmt(k.harga)}</td>
-        <td class="right">Rp${fmt(k.total)}</td>
-        <td><button class="danger" onclick="hapusItem(${i})">x</button></td>
-      </tr>`;
-  });
-  $("subtotal").innerText = "Rp" + fmt(sub);
-}
-
-function hapusItem(i){
-  const item = keranjang[i];
-  barang.find(b => b.nama === item.nama).stok += item.qty;
-  keranjang.splice(i,1);
-  saveBarang(); renderKeranjang(); renderBarang(); renderStok();
-}
-
-function simpan(){
-  if (!keranjang.length) return alert("Keranjang kosong!");
-
-  const iso = $("tglTransaksi").value || todayISO();
-  const tgl = toDMY(iso);
-  const jam = new Date().toLocaleTimeString("id-ID");
-  const total = keranjang.reduce((a,b)=>a+b.total,0);
-
-  laporan.push({ tgl, jam, total });
-  saveLaporan();
-  keranjang = [];
-  alert("✅ Transaksi disimpan!");
-  renderKeranjang(); tampilLaporan();
-}
-
-// ============================
-// 2. STOK
-// ============================
-function renderStok(){
-  const box = $("stok");
-  if (!barang.length){
-    box.innerHTML = "<p>Belum ada barang</p>";
-    return;
-  }
-  let html = `<table>
-    <thead>
-      <tr>
-        <th>Nama</th><th class="right">Harga Beli</th>
-        <th class="right">Harga Jual</th><th class="center">Stok</th>
-        <th>Aksi</th>
-      </tr>
-    </thead><tbody>`;
-  barang.forEach((b,i)=>{
-    html += `
-      <tr>
-        <td>${b.nama}</td>
-        <td class="right"><a href="#" onclick="editHbeli(${i});return false;">Rp${fmt(b.hbeli||0)}</a></td>
-        <td class="right"><a href="#" onclick="editHjual(${i});return false;">Rp${fmt(b.harga||0)}</a></td>
-        <td class="center"><a href="#" onclick="editStok(${i});return false;">${b.stok}</a></td>
-        <td><button class="danger" onclick="hapusBarang(${i})">Hapus</button></td>
-      </tr>`;
-  });
-  html += "</tbody></table>";
-  box.innerHTML = html;
-}
-
-function tambahBarang(){
-  const nama = $("namaBarang").value.trim();
-  const hbeli = parseInt($("hargaBeli").value);
-  const harga = parseInt($("hargaJual").value);
-  const stok = parseInt($("stokBarang").value);
-
-  if (!nama) return alert("Nama barang kosong");
-  barang.push({
-    nama,
-    hbeli: isNaN(hbeli)?0:hbeli,
-    harga: isNaN(harga)?0:harga,
-    stok: isNaN(stok)?0:stok
-  });
-  saveBarang();
-  $("namaBarang").value = $("hargaBeli").value = $("hargaJual").value = $("stokBarang").value = "";
-  renderBarang(); renderStok();
-}
-
-function editHbeli(i){
-  const v = prompt("Harga beli baru:", barang[i].hbeli||0);
-  if (v===null) return;
-  const x = parseInt(v);
-  if (!isNaN(x)){
-    barang[i].hbeli = x;
-    saveBarang(); renderStok();
-  }
-}
-
-function editHjual(i){
-  const v = prompt("Harga jual baru:", barang[i].harga||0);
-  if (v===null) return;
-  const x = parseInt(v);
-  if (!isNaN(x)){
-    barang[i].harga = x;
-    saveBarang(); renderStok(); renderBarang();
-  }
-}
-
-function editStok(i){
-  const v = prompt("Stok baru:", barang[i].stok||0);
-  if (v===null) return;
-  const x = parseInt(v);
-  if (!isNaN(x)){
-    barang[i].stok = x;
-    saveBarang(); renderStok(); renderBarang();
-  }
-}
-
-function hapusBarang(i){
-  if (confirm("Hapus barang ini?")){
-    barang.splice(i,1);
-    saveBarang(); renderStok(); renderBarang();
-  }
-}
-
-// ============================
-// 3. LAPORAN
-// ============================
-function tampilLaporan(data = laporan){
-  const box = $("laporan"), sum = $("ringkas");
-  if (!data.length){
-    box.innerHTML = "<p>Belum ada laporan</p>";
-    sum.innerHTML = "";
-    return;
-  }
-  const map = {};
-  data.forEach(r => {
-    if (!map[r.tgl]) map[r.tgl] = { total: 0, count: 0 };
-    map[r.tgl].total += r.total;
-    map[r.tgl].count++;
-  });
-
-  let rows = "";
-  Object.keys(map).sort().reverse().forEach(t=>{
-    rows += `
-      <tr>
-        <td>${t}</td>
-        <td class="right">Rp${fmt(map[t].total)}</td>
-        <td class="center">${map[t].count}</td>
-      </tr>`;
-  });
-
-  box.innerHTML = `
-    <table>
-      <thead>
-        <tr><th>Tanggal</th><th class="right">Total</th><th class="center">Transaksi</th></tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-
-  const totalSemua = data.reduce((a,b)=>a+b.total,0);
-  sum.innerHTML = `Total keseluruhan: <b>Rp${fmt(totalSemua)}</b>`;
-}
-
-function filterLaporan(){
-  const dt = $("filterTanggalLap").value;
-  const bln = $("filterBulanLap").value;
-  let data = laporan;
-  if (dt) data = data.filter(l => l.tgl === toDMY(dt));
-  else if (bln){
-    const [y,m] = bln.split("-");
-    data = data.filter(l => {
-      const [d2,m2,y2] = l.tgl.split("/");
-      return y2===y && m2===m;
-    });
-  }
-  tampilLaporan(data);
-}
-
-// ============================
-// 4. KEUANGAN
-// ============================
-function keuTambah(){
-  const iso = $("keuTanggal").value || todayISO();
-  const tgl = toDMY(iso);
-  const jenis = $("keuJenis").value;
-  const ket = $("keuKet").value || jenis;
-  const nominal = parseInt($("keuNominal").value);
-  if (!nominal) return alert("Nominal tidak valid!");
-
-  keuangan.push({
-    id: Date.now(),
-    tgl, jenis, ket, nominal
-  });
-  saveKeuangan();
-  $("keuKet").value = $("keuNominal").value = "";
-  keuTampil();
-}
-
-function keuTampil(data=keuangan){
-  const box = $("keuTabel"), sum = $("keuRingkas");
-  if (!data.length){
-    box.innerHTML = "<p>Belum ada data keuangan</p>";
-    sum.innerHTML="";
-    return;
-  }
-  let trx="", pemasukan=0, pengeluaran=0;
-  data.forEach(e=>{
-    if(e.jenis==="pemasukan") pemasukan+=e.nominal; else pengeluaran+=e.nominal;
-    trx+=`
-      <tr>
-        <td>${e.tgl}</td>
-        <td>${e.ket}</td>
-        <td>${e.jenis}</td>
-        <td class="right">Rp${fmt(e.nominal)}</td>
-        <td class="center">
-          <button onclick="keuEdit(${e.id})">✏</button>
-          <button class="danger" onclick="keuHapus(${e.id})">🗑</button>
-        </td>
-      </tr>`;
-  });
-
-  box.innerHTML = `
-    <table>
-      <thead>
-        <tr><th>Tgl</th><th>Keterangan</th><th>Jenis</th><th class="right">Nominal</th><th>Aksi</th></tr>
-      </thead>
-      <tbody>${trx}</tbody>
-    </table>`;
-  sum.innerHTML = `Masuk: <b>Rp${fmt(pemasukan)}</b> • Keluar: <b>Rp${fmt(pengeluaran)}</b> • Saldo: <b>Rp${fmt(pemasukan-pengeluaran)}</b>`;
-}
-
-function keuFilter(){
-  const dt = $("keuFilterTanggal").value;
-  const bln = $("keuFilterBulan").value;
-  let data = keuangan;
-  if (dt) data = data.filter(e=>e.tgl===toDMY(dt));
-  else if (bln){
-    const [y,m] = bln.split("-");
-    data = data.filter(e=>{
-      const [d2,m2,y2]=e.tgl.split("/");
-      return y2===y && m2===m;
-    });
-  }
-  keuTampil(data);
-}
-
-function keuEdit(id){
-  const e = keuangan.find(x=>x.id===id); if(!e) return;
-  const t = prompt("Tanggal (dd/mm/yyyy):", e.tgl); if(t===null) return;
-  const k = prompt("Keterangan:", e.ket); if(k===null) return;
-  const j = prompt("Jenis (pemasukan/pengeluaran):", e.jenis); if(j===null) return;
-  const n = parseInt(prompt("Nominal:", e.nominal)); if(isNaN(n)) return;
-  Object.assign(e,{tgl:t, ket:k, jenis:j, nominal:n});
-  saveKeuangan(); keuTampil();
-}
-
-function keuHapus(id){
-  if(!confirm("Hapus data ini?")) return;
-  keuangan = keuangan.filter(x=>x.id!==id);
-  saveKeuangan(); keuTampil();
-}
-
-// ============================
-// 5. USER
-// ============================
-function renderUsers(){
-  const body = USERS.map(u => `
-    <tr>
-      <td>${u.username}</td>
-      <td class="center">
-        <button onclick="userPass('${u.username}')">Ganti Password</button>
-        ${u.username==='admin'?'':`<button class="danger" onclick="userDel('${u.username}')">Hapus</button>`}
-      </td>
-    </tr>`).join("");
-
-  $("userTable").innerHTML = `
-    <table>
-      <thead><tr><th>Username</th><th>Aksi</th></tr></thead>
-      <tbody>${body}</tbody>
-    </table>
-  `;
-}
-
-function userAdd(){
-  const u = $("userNewName").value.trim();
-  const p = $("userNewPass").value.trim();
-  if(!u||!p) return alert("Isi username & password!");
-  if(USERS.find(x=>x.username===u)) return alert("Username sudah ada!");
-  USERS.push({username:u,password:p});
-  saveUsers(); $("userNewName").value = $("userNewPass").value = "";
-  renderUsers();
-}
-
-function userPass(name){
-  const p = prompt("Password baru untuk "+name+":","");
-  if(p===null) return;
-  const u = USERS.find(x=>x.username===name);
-  u.password = p; saveUsers(); alert("Password diperbarui!");
-}
-
-function userDel(name){
-  if(!confirm("Hapus user "+name+" ?")) return;
-  USERS = USERS.filter(x=>x.username!==name);
-  saveUsers(); renderUsers();
-}
 </script>
 
 </body>
