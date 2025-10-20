@@ -1,34 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Kasir PT. BSV Marcela Groups – Final Web Version</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kasir PT. BSV Marcela Groups – Web Final</title>
 
-  <!-- Non-PWA (Focus Web Only) -->
+  <!-- Anti-cache (agar update langsung terlihat) -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 
+  <!-- Style utama (TANPA PWA, TANPA manifest) -->
   <style>
-    :root{--bg:#0f172a;--card:#111827;--accent:#0ea5e9;--btn:#38bdf8;--muted:#94a3b8;--border:#334155}
-    *{box-sizing:border-box}
-    body{font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:#e5e7eb;margin:0}
-    header{background:var(--accent);color:#fff;padding:14px 18px;text-align:center;font-weight:700}
-    .container{max-width:1080px;margin:0 auto;padding:18px}
-    .card{background:var(--card);border-radius:12px;padding:18px;margin-top:16px}
-    .nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-    .nav button{background:#1f2937;color:#e5e7eb;border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer}
-    .nav button.active{background:var(--btn);color:#002133;font-weight:700}
-    input,select,button{width:100%;padding:10px;margin:6px 0;border:none;border-radius:8px}
-    input,select{background:#e2e8f0;color:#000}
-    button.primary{background:var(--btn);color:#002133;font-weight:700;cursor:pointer}
-    button.primary:hover{background:var(--accent)}
-    button.danger{background:#ef4444;color:#fff}
-    button.danger:hover{background:#dc2626}
-    table{width:100%;border-collapse:collapse;margin-top:10px}
-    th,td{border-bottom:1px solid var(--border);padding:8px;text-align:left;vertical-align:top}
-    th{background:#1e293b}
-    .right{text-align:right}.center{text-align:center}
-    .muted{color:var(--muted)}
-    .hidden{display:none}
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --accent: #0ea5e9;
+      --btn: #38bdf8;
+      --muted: #94a3b8;
+      --border: #334155;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: Segoe UI, Arial, sans-serif;
+      background: var(--bg);
+      color: #e5e7eb;
+      margin: 0;
+    }
+    header {
+      background: var(--accent);
+      color: white;
+      padding: 14px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 16px;
+    }
+    .nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 12px 0;
+    }
+    .nav button {
+      background: #1f2937;
+      border: 1px solid var(--border);
+      color: #e5e7eb;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .nav button.active {
+      background: var(--btn);
+      color: #002133;
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: none;
+      border-radius: 8px;
+    }
+    input, select {
+      background: #e2e8f0;
+      color: #000;
+    }
+    button.primary {
+      background: var(--btn);
+      color: #002133;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button.primary:hover {
+      background: var(--accent);
+    }
+    button.danger {
+      background: #ef4444;
+      color: white;
+    }
+    button.danger:hover { background: #dc2626; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 8px;
+      text-align: left;
+    }
+    th { background: #1e293b; }
+    .right { text-align: right; }
+    .center { text-align: center; }
+    .muted { color: var(--muted); }
+    .hidden { display: none; }
   </style>
 </head>
+<body>
+<header>💼 PT. BSV Marcela Groups – Kasir Web (Final)</header>
+
+<div class="container">
+
+  <!-- LOGIN -->
+  <div id="login" class="card">
+    <h3>🔐 Login</h3>
+    <input id="username" placeholder="Username (admin)">
+    <input id="password" type="password" placeholder="Password (admin123)">
+    <button class="primary" onclick="login()">Masuk</button>
+    <p id="msg" style="color:#f87171"></p>
+  </div>
+
+  <!-- APLIKASI -->
+  <div id="app" class="hidden">
+    <h2 id="welcome">👋 Selamat datang</h2>
+
+    <!-- MENU NAVIGASI -->
+    <div class="nav">
+      <button id="tab-pos" class="active" onclick="showTab('pos')">🛒 Transaksi</button>
+      <button id="tab-stok" onclick="showTab('stok')">📦 Stok</button>
+      <button id="tab-lap" onclick="showTab('lap')">📈 Laporan</button>
+      <button id="tab-keu" onclick="showTab('keu')">💸 Keuangan</button>
+      <button id="tab-user" onclick="showTab('user')">👥 User</button>
+      <button class="danger" style="margin-left:auto" onclick="logout()">🚪 Logout</button>
+    </div>
+
+    <!-- =================== -->
+    <!-- BAGIAN TRANSAKSI   -->
+    <!-- =================== -->
+    <div id="sec-pos" class="card">
+      <h3>🛒 Transaksi Penjualan</h3>
+      <select id="barang"></select>
+      <input id="qty" type="number" value="1" min="1">
+      <button class="primary" onclick="tambah()">Tambah ke Keranjang</button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Barang</th>
+            <th class="center">Qty</th>
+            <th class="right">Harga</th>
+            <th class="right">Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="keranjang"></tbody>
+        <tfoot>
+          <tr>
+            <th colspan="3" class="right">Subtotal</th>
+            <th id="subtotal" class="right">Rp0</th>
+            <th></th>
+          </tr>
+        </tfoot>
+      </table>
+
+      <label class="muted">📅 Tanggal Transaksi</label>
+      <input type="date" id="tglTransaksi">
+      <button class="primary" onclick="simpan()">Simpan & Cetak Nota</button>
+    </div>
+    <!-- =================== -->
+    <!-- BAGIAN STOK BARANG -->
+    <!-- =================== -->
+    <div id="sec-stok" class="card hidden">
+      <h3>📦 Stok Barang</h3>
+      <div id="stok"></div>
+
+      <h4>Tambah Barang Baru</h4>
+      <input id="namaBarang" placeholder="Nama Barang">
+      <input id="hargaBeli" type="number" placeholder="Harga Beli (Modal)">
+      <input id="hargaJual" type="number" placeholder="Harga Jual">
+      <input id="stokBarang" type="number" placeholder="Stok">
+      <button class="primary" onclick="tambahBarang()">Tambah Barang</button>
+      <p class="muted">* Klik harga/stok di tabel untuk edit cepat.</p>
+    </div>
+
+    <!-- =================== -->
+    <!-- BAGIAN LAPORAN     -->
+    <!-- =================== -->
+    <div id="sec-lap" class="card hidden">
+      <h3>📈 Laporan Penjualan Harian</h3>
+      <label>Filter Tanggal :</label>
+      <input type="date" id="filterTanggalLap">
+      <label>Filter Bulan :</label>
+      <input type="month" id="filterBulanLap">
+      <button onclick="tampilLaporan()">Tampilkan Semua</button>
+      <button class="primary" onclick="filterLaporan()">Filter</button>
+      <div id="laporan" style="margin-top:10px"></div>
+      <div id="ringkas" class="muted" style="margin-top:10px"></div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- BAGIAN PEMASUKAN/PENGELUARAN -->
+    <!-- ============================= -->
+    <div id="sec-keu" class="card hidden">
+      <h3>💸 Pemasukan & Pengeluaran</h3>
+
+      <input type="date" id="keuTanggal">
+      <select id="keuJenis">
+        <option value="pemasukan">Pemasukan</option>
+        <option value="pengeluaran">Pengeluaran</option>
+      </select>
+      <input id="keuKet" placeholder="Keterangan (misal: Beli Solar)">
+      <input type="number" id="keuNominal" placeholder="Nominal">
+      <button class="primary" onclick="keuTambah()">Tambah</button>
+
+      <label>Filter Harian :</label>
+      <input type="date" id="keuFilterTanggal">
+      <label>Filter Bulanan :</label>
+      <input type="month" id="keuFilterBulan">
+      <button onclick="keuTampil()">Semua</button>
+      <button class="primary" onclick="keuFilter()">Filter</button>
+
+      <div id="keuTabel" style="margin-top:10px"></div>
+      <div id="keuRingkas" class="muted" style="margin-top:10px"></div>
+    </div>
+
+    <!-- =================== -->
+    <!-- BAGIAN USER        -->
+    <!-- =================== -->
+    <div id="sec-user" class="card hidden">
+      <h3>👥 Manajemen User</h3>
+      <input id="userNewName" placeholder="Username baru">
+      <input id="userNewPass" placeholder="Password baru">
+      <button class="primary" onclick="userAdd()">Tambah User</button>
+
+      <div id="userTable" style="margin-top:10px"></div>
+      <p class="muted">* Default user: admin / admin123</p>
+    </div>
+
+  </div><!-- /app -->
+</div><!-- /container -->
+
+<footer style="text-align:center;margin:20px" class="muted">
+  © 2025 PT. BSV Marcela Groups
+</footer>
+
+<!-- ================================== -->
+<!-- JAVASCRIPT SELURUH FITUR APLIKASI -->
+<!-- ================================== -->
+<script>
+/* ========== FUNGSI UTAMA ========== */
+const $ = id => document.getElementById(id);
+const fmt = n => new Intl.NumberFormat('id-ID').format(n || 0);
+const todayISO = () => {
+  const d = new Date();
+  return d.toISOString().split("T")[0];
+};
+const toDMY = iso => {
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+};
+
+/* ====== DATA LOCALSTORAGE ====== */
+let USERS = JSON.parse(localStorage.getItem("bsv_users")) || [
+  { username: "admin", password: "admin123" }
+];
+let barang = JSON.parse(localStorage.getItem("bsv_barang")) || [];
+let laporan = JSON.parse(localStorage.getItem("bsv_laporan")) || [];
+let keuangan = JSON.parse(localStorage.getItem("bsv_keuangan")) || [];
+let keranjang = [];
+
+function saveBarang() { localStorage.setItem("bsv_barang", JSON.stringify(barang)); }
+function saveLaporan() { localStorage.setItem("bsv_laporan", JSON.stringify(laporan)); }
+function saveKeuangan() { localStorage.setItem("bsv_keuangan", JSON.stringify(keuangan)); }
+function saveUsers() { localStorage.setItem("bsv_users", JSON.stringify(USERS)); }
+
+/* ====== LOGIN ====== */
+function login() {
+  const u = $("username").value.trim();
+  const p = $("password").value.trim();
+  const user = USERS.find(x => x.username === u && x.password === p);
+  if (!user) {
+    $("msg").innerText = "❌ Username atau password salah!";
+    return;
+  }
+  $("login").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  $("welcome").innerText = `👋 Selamat datang, ${u.toUpperCase()}`;
+  $("tglTransaksi").value = todayISO();
+  renderBarang();
+  renderStok();
+  tampilLaporan();
+  keuTampil();
+  renderUsers();
+}
+
+/* ====== LOGOUT ====== */
+function logout() {
+  location.reload();
+}
+
+/* ====== NAV TAB ====== */
+function showTab(tab) {
+  ["pos", "stok", "lap", "keu", "user"].forEach(t => {
+    $(`sec-${t}`).classList.add("hidden");
+    $(`tab-${t}`).classList.remove("active");
+  });
+  $(`sec-${tab}`).classList.remove("hidden");
+  $(`tab-${tab}`).classList.add("active");
+}
+
+/* ======================= */
+/*       TRANSAKSI (POS)   */
+/* ======================= */
+function renderBarang() {
+  const sel = $("barang");
+  sel.innerHTML = "";
+  if (!barang.length) {
+    sel.innerHTML = "<option>(Belum ada barang)</option>";
+    return;
+  }
+  barang.forEach((b, i) => {
+    sel.innerHTML += `<option value="${i}">${b.nama} - Rp${fmt(b.harga)} (Stok ${b.stok})</option>`;
+  });
+}
+
+function tambah() {
+  const i = $("barang").value;
+  const qty = parseInt($("qty").value);
+  if (!barang[i] || qty <= 0) return alert("Barang/Qty tidak valid!");
+  if (barang[i].stok < qty) return alert("Stok tidak cukup!");
+
+  barang[i].stok -= qty;
+  keranjang.push({
+    nama: barang[i].nama,
+    harga: barang[i].harga,
+    qty,
+    total: barang[i].harga * qty
+  });
+
+  saveBarang();
+  renderKeranjang();
+  renderBarang();
+  renderStok();
+}
+
+function renderKeranjang() {
+  const tb = $("keranjang");
+  tb.innerHTML = "";
+  let sub = 0;
+  keranjang.forEach((k, i) => {
+    sub += k.total;
+    tb.innerHTML += `
+      <tr>
+        <td>${k.nama}</td>
+        <td class="center">${k.qty}</td>
+        <td class="right">Rp${fmt(k.harga)}</td>
+        <td class="right">Rp${fmt(k.total)}</td>
+        <td><button class="danger" onclick="hapusItem(${i})">x</button></td>
+      </tr>`;
+  });
+  $("subtotal").innerText = `Rp${fmt(sub)}`;
+}
+
+function hapusItem(i) {
+  const item = keranjang[i];
+  const stokAsli = barang.find(b => b.nama === item.nama);
+  if (stokAsli) stokAsli.stok += item.qty;
+  keranjang.splice(i, 1);
+  saveBarang();
+  renderKeranjang();
+  renderBarang();
+  renderStok();
+}
+
+function simpan() {
+  if (!keranjang.length) return alert("Keranjang kosong!");
+  const iso = $("tglTransaksi").value || todayISO();
+  const tgl = toDMY(iso);
+  const jam = new Date().toLocaleTimeString("id-ID");
+  const total = keranjang.reduce((a, b) => a + b.total, 0);
+  laporan.push({ tgl, jam, total });
+  saveLaporan();
+  keranjang = [];
+  alert("Transaksi berhasil disimpan!");
+  renderKeranjang();
+  tampilLaporan();
+}
