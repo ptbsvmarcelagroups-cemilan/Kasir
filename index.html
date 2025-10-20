@@ -1,24 +1,36 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Login – Kasir PT. BSV</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – Kasir BSV</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="login-body">
 
-<div class="login-container">
-  <h2>💼 PT. BSV Marcela Groups</h2>
-  <p class="subtitle">Silakan login untuk melanjutkan</p>
+  <div class="login-container">
+    <h2>💼 PT. BSV Marcela Groups</h2>
+    <p class="muted">Sistem Kasir & Keuangan</p>
 
-  <input type="text" id="username" placeholder="Username">
-  <input type="password" id="password" placeholder="Password">
-  
-  <button onclick="login()">Masuk</button>
-  <p id="error-msg"></p>
-</div>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
 
-<script src="script.js"></script>
+    <button onclick="login()" class="btn-primary">Masuk</button>
+    <p id="loginError" class="error"></p>
+  </div>
+
+  <script>
+    function login() {
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+
+      if (user === "admin" && pass === "admin123") {
+        window.location.href = "dashboard.html";
+      } else {
+        document.getElementById('loginError').innerText = "❌ Username atau password salah!";
+      }
+    }
+  </script>
+
 </body>
 </html>
