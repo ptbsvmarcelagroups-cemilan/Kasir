@@ -8,23 +8,98 @@
 </head>
 <body>
 
-<header class="topbar">
-  💼 PT. BSV Marcela Groups – Dashboard
-  <button onclick="logout()" class="logout-btn">Logout</button>
+<header class="header">
+  <h1>💼 Kasir PT. BSV Marcela Groups</h1>
+  <button class="btn-logout" onclick="logout()">Logout</button>
 </header>
 
-<nav class="sidebar">
-  <button onclick="showPage('transaksi')" id="btn-transaksi" class="active">🛒 Transaksi</button>
-  <button onclick="showPage('stok')" id="btn-stok">📦 Stok Barang</button>
-  <button onclick="showPage('laporan')" id="btn-laporan">📈 Laporan</button>
-  <button onclick="showPage('keuangan')" id="btn-keuangan">💸 Keuangan</button>
+<nav class="nav">
+  <button onclick="showPage('transaksi')" class="nav-btn active" id="btn-transaksi">🛒 Transaksi</button>
+  <button onclick="showPage('stok')" class="nav-btn" id="btn-stok">📦 Stok</button>
+  <button onclick="showPage('laporan')" class="nav-btn" id="btn-laporan">📈 Laporan</button>
+  <button onclick="showPage('keuangan')" class="nav-btn" id="btn-keuangan">💸 Pemasukan & Pengeluaran</button>
 </nav>
 
-<main id="content">
-  <h2>Selamat datang 👋</h2>
-  <p>Silakan pilih menu di sebelah kiri.</p>
+<!-- ========== Halaman Konten ========== -->
+<main id="page">
+
+  <!-- ✅ Halaman 1: Transaksi -->
+  <section id="page-transaksi">
+    <h2>🛒 Transaksi Penjualan</h2>
+    <select id="transaksiBarang"></select>
+    <input type="number" id="transaksiQty" value="1" min="1">
+    <button onclick="addToCart()" class="btn-primary">Tambah</button>
+
+    <table class="table">
+      <thead>
+        <tr><th>Barang</th><th>Qty</th><th>Harga</th><th>Total</th><th></th></tr>
+      </thead>
+      <tbody id="cartTable"></tbody>
+      <tfoot>
+        <tr>
+          <th colspan="3" class="right">Subtotal</th>
+          <th id="cartTotal">Rp0</th>
+          <th></th>
+        </tr>
+      </tfoot>
+    </table>
+
+    <label>Tanggal</label>
+    <input type="date" id="transaksiTanggal">
+
+    <button onclick="saveTransaction()" class="btn-primary">Simpan Transaksi</button>
+  </section>
+
+  <!-- ✅ Halaman 2: Stok -->
+  <section id="page-stok" style="display:none;">
+    <h2>📦 Stok Barang</h2>
+    <div id="stokTable"></div>
+
+    <h3>Tambah Barang</h3>
+    <input type="text" id="stokNama" placeholder="Nama Barang">
+    <input type="number" id="stokBeli" placeholder="Harga Beli">
+    <input type="number" id="stokJual" placeholder="Harga Jual">
+    <input type="number" id="stokQty" placeholder="Stok">
+    <button onclick="addBarang()" class="btn-primary">Tambah Barang</button>
+  </section>
+
+  <!-- ✅ Halaman 3: Laporan -->
+  <section id="page-laporan" style="display:none;">
+    <h2>📈 Laporan Penjualan</h2>
+    <label>Filter Tanggal</label>
+    <input type="date" id="filterTanggal">
+    <button onclick="filterLaporan()" class="btn-primary">Filter</button>
+    <button onclick="showLaporan()" class="btn-secondary">Tampilkan Semua</button>
+
+    <div id="laporanTable"></div>
+  </section>
+
+  <!-- ✅ Halaman 4: Pemasukan & Pengeluaran -->
+  <section id="page-keuangan" style="display:none;">
+    <h2>💸 Pemasukan & Pengeluaran</h2>
+    <input type="date" id="keuTanggal">
+    <select id="keuJenis">
+      <option value="pemasukan">Pemasukan</option>
+      <option value="pengeluaran">Pengeluaran</option>
+    </select>
+    <input type="text" id="keuKeterangan" placeholder="Keterangan">
+    <input type="number" id="keuNominal" placeholder="Nominal">
+    <button onclick="addKeuangan()" class="btn-primary">Tambah</button>
+
+    <h3>Filter</h3>
+    <input type="date" id="keuFilterTanggal">
+    <button onclick="filterKeuangan()" class="btn-primary">Filter</button>
+
+    <div id="keuanganTable"></div>
+    <div id="keuanganSummary" class="muted"></div>
+  </section>
+
 </main>
 
 <script src="script.js"></script>
+<script>
+  document.getElementById('transaksiTanggal').valueAsDate = new Date();
+</script>
+
 </body>
 </html>
