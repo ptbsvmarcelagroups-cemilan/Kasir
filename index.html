@@ -7,8 +7,8 @@
   <style>
     body {
       background: #0f172a;
-      font-family: Arial, sans-serif;
       color: #fff;
+      font-family: Arial, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -42,7 +42,7 @@
     }
     button:hover {
       background: #0ea5e9;
-      color: white;
+      color: #fff;
     }
     .error {
       color: #f87171;
@@ -61,17 +61,16 @@
 </div>
 
 <script>
-  function login() {
-    const user = document.getElementById('username').value.trim();
-    const pass = document.getElementById('password').value.trim();
+function login() {
+  const user = document.getElementById('username').value.trim();
+  const pass = document.getElementById('password').value.trim();
 
-    if (user === "admin" && pass === "admin123") {
-      // Berhasil login → pindah halaman
-      window.location.href = "home.html"; 
-    } else {
-      document.getElementById('error').innerText = "❌ Username atau password salah!";
-    }
+  if (user === "admin" && pass === "admin123") {
+    window.location.href = "home.html"; 
+  } else {
+    document.getElementById('error').innerText = "❌ Username atau password salah!";
   }
+}
 </script>
 
 </body>
