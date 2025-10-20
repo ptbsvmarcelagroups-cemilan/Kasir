@@ -3,34 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login – Kasir BSV</title>
+  <title>Login Kasir BSV</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="login-body">
 
-  <div class="login-container">
-    <h2>💼 PT. BSV Marcela Groups</h2>
-    <p class="muted">Sistem Kasir & Keuangan</p>
+<div class="login-box">
+  <h2>🔐 Login Kasir PT. BSV</h2>
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Masuk</button>
+  <p id="errorMsg" class="error"></p>
+</div>
 
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-
-    <button onclick="login()" class="btn-primary">Masuk</button>
-    <p id="loginError" class="error"></p>
-  </div>
-
-  <script>
-    function login() {
-      const user = document.getElementById('username').value.trim();
-      const pass = document.getElementById('password').value.trim();
-
-      if (user === "admin" && pass === "admin123") {
-        window.location.href = "dashboard.html";
-      } else {
-        document.getElementById('loginError').innerText = "❌ Username atau password salah!";
-      }
-    }
-  </script>
-
+<script src="script.js"></script>
 </body>
 </html>
