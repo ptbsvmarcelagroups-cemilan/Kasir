@@ -6,13 +6,20 @@
 <title>Kasir PT. BSV Marcela Groups — FINAL</title>
 <style>
   :root{--bg:#0f172a;--card:#1e293b;--muted:#94a3b8;--accent:#0ea5e9;--primary:#38bdf8;--danger:#ef4444;--border:#334155;--text:#e5e7eb}
-  *{box-sizing:border-box} body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
-  .container{max-width:960px;margin:auto;padding:16px}
-  .card{background:var(--card);border-radius:12px;padding:16px;margin:14px 0}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  .hidden{display:none}
+  /* Layout */
   .header{position:sticky;top:0;z-index:10;background:var(--accent);color:#fff;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px;font-weight:700}
-  .nav{display:flex;gap:8px;flex-wrap:wrap;background:#0b1224;border-bottom:1px solid var(--border);padding:10px;border-radius:12px}
+  .container{max-width:960px;margin:auto;padding:16px}
+  .nav{display:flex;gap:8px;flex-wrap:wrap;background:#0b1224;border:1px solid var(--border);padding:10px;border-radius:12px}
   .nav button{background:#1f2937;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;cursor:pointer}
   .nav .active{background:var(--primary);color:#002133}
+  .card{background:var(--card);border-radius:12px;padding:16px;margin:14px 0}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{border-bottom:1px solid var(--border);padding:8px;text-align:left}
+  th{background:#1f293b}
+  .right{text-align:right}.center{text-align:center}
   input,select,button{width:100%;padding:10px;margin:6px 0;border:none;border-radius:8px}
   input,select{background:#e2e8f0;color:#111}
   .btn-primary{background:var(--primary);color:#002133;font-weight:700;cursor:pointer}
@@ -21,16 +28,11 @@
   .btn:hover{background:#475569}
   .btn-danger{background:var(--danger);color:#fff}
   .btn-danger:hover{background:#dc2626}
-  table{width:100%;border-collapse:collapse;margin-top:10px}
-  th,td{border-bottom:1px solid var(--border);padding:8px;text-align:left}
-  th{background:#1e293b}
-  .right{text-align:right}.center{text-align:center}
   .muted{color:var(--muted)}
-  .hidden{display:none}
-  /* LOGIN */
+  /* Login */
   .login-wrap{min-height:100vh;display:grid;place-items:center;padding:20px}
   .login-box{width:100%;max-width:360px;background:var(--card);padding:28px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);text-align:center}
-  /* Compact section width */
+  /* Section width compact */
   section .card{max-width:900px;margin-left:auto;margin-right:auto}
   @media (max-width:900px){.container{padding:12px}}
 </style>
@@ -44,7 +46,7 @@
     <p class="muted">Sistem Kasir & Keuangan</p>
     <input id="loginUser" placeholder="Username (admin)">
     <input id="loginPass" type="password" placeholder="Password (admin123)">
-    <button class="btn-primary" onclick="doLogin()">Masuk</button>
+    <button class="btn-primary" id="btnLogin">Masuk</button>
     <p id="loginMsg" style="color:#f87171;min-height:20px"></p>
   </div>
 </div>
@@ -53,26 +55,25 @@
 <div id="appView" class="hidden">
   <div class="header">
     <div>📦 Kasir PT. BSV Marcela Groups</div>
-    <button class="btn-danger" onclick="doLogout()">Logout</button>
+    <button class="btn-danger" id="btnLogout">Logout</button>
   </div>
 
   <div class="container">
-    <div class="nav">
-      <button id="tab-transaksi" class="active" onclick="showTab('transaksi')">🛒 Transaksi</button>
-      <button id="tab-stok" onclick="showTab('stok')">📦 Stok</button>
-      <button id="tab-laporan" onclick="showTab('laporan')">📈 Laporan</button>
-      <button id="tab-keuangan" onclick="showTab('keuangan')">💸 Keuangan</button>
+    <!-- NAV -->
+    <div class="nav" id="navTabs">
+      <button id="tab-transaksi" class="active" data-tab="transaksi">🛒 Transaksi</button>
+      <button id="tab-stok" data-tab="stok">📦 Stok</button>
+      <button id="tab-laporan" data-tab="laporan">📈 Laporan</button>
+      <button id="tab-keuangan" data-tab="keuangan">💸 Keuangan</button>
     </div>
 
     <!-- TRANSAKSI -->
     <section id="sec-transaksi">
       <div class="card">
         <h3>🛒 Transaksi Penjualan</h3>
-        <label>Barang</label>
-        <select id="trxBarang"></select>
-        <label>Qty</label>
-        <input id="trxQty" type="number" value="1" min="1">
-        <button class="btn-primary" onclick="addToCart()">+ Tambah</button>
+        <label>Barang</label><select id="trxBarang"></select>
+        <label>Qty</label><input id="trxQty" type="number" value="1" min="1">
+        <button class="btn-primary" id="btnAddCart">+ Tambah</button>
 
         <table>
           <thead><tr><th>Barang</th><th class="center">Qty</th><th class="right">Harga</th><th class="right">Total</th><th></th></tr></thead>
@@ -80,12 +81,10 @@
           <tfoot><tr><th colspan="3" class="right">Subtotal</th><th id="cartTotal" class="right">Rp0</th><th></th></tr></tfoot>
         </table>
 
-        <label class="muted">📅 Tanggal</label>
-        <input id="trxDate" type="date">
-
+        <label class="muted">📅 Tanggal</label><input id="trxDate" type="date">
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" onclick="clearCart()">Bersihkan</button>
-          <button class="btn-primary" onclick="saveTransaction()">Simpan & Cetak / Download Nota</button>
+          <button class="btn" id="btnClearCart">Bersihkan</button>
+          <button class="btn-primary" id="btnSaveTransaction">Simpan & Cetak / Download Nota</button>
         </div>
       </div>
     </section>
@@ -101,7 +100,7 @@
         <input id="sHbeli" type="number" placeholder="Harga Beli (opsional)">
         <input id="sHjual" type="number" placeholder="Harga Jual">
         <input id="sQty" type="number" placeholder="Stok">
-        <button class="btn-primary" onclick="stokTambah()">Tambah Barang</button>
+        <button class="btn-primary" id="btnAddBarang">Tambah Barang</button>
         <p class="muted">* Klik tombol ✏ untuk edit cepat. 🗑 untuk hapus.</p>
       </div>
     </section>
@@ -115,8 +114,8 @@
           <div><label>Filter Bulan</label><input type="month" id="lapMonth"></div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-          <button class="btn" onclick="renderLaporan()">Tampilkan Semua</button>
-          <button class="btn-primary" onclick="filterLaporan()">Filter</button>
+          <button class="btn" id="btnLapAll">Tampilkan Semua</button>
+          <button class="btn-primary" id="btnLapFilter">Filter</button>
         </div>
         <div id="laporanWrap" style="margin-top:10px"></div>
         <div id="laporanRingkas" class="muted" style="margin-top:6px"></div>
@@ -129,16 +128,13 @@
         <h3>💸 Pemasukan & Pengeluaran</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:520px">
           <input id="kDate" type="date">
-          <select id="kJenis">
-            <option value="pemasukan">Pemasukan</option>
-            <option value="pengeluaran">Pengeluaran</option>
-          </select>
+          <select id="kJenis"><option value="pemasukan">Pemasukan</option><option value="pengeluaran">Pengeluaran</option></select>
         </div>
         <input id="kKet" placeholder="Keterangan (misal: Penjualan / Beli Solar)">
         <input id="kNom" type="number" placeholder="Nominal">
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn-primary" onclick="keuTambah()">Tambah</button>
-          <button class="btn" onclick="renderKeuangan()">Tampilkan Semua</button>
+          <button class="btn-primary" id="btnKeuTambah">Tambah</button>
+          <button class="btn" id="btnKeuAll">Tampilkan Semua</button>
         </div>
 
         <h4 style="margin-top:12px">Filter</h4>
@@ -147,64 +143,57 @@
           <input id="kfMonth" type="month">
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-          <button class="btn" onclick="renderKeuangan()">Reset</button>
-          <button class="btn-primary" onclick="keuFilter()">Filter</button>
+          <button class="btn" id="btnKeuReset">Reset</button>
+          <button class="btn-primary" id="btnKeuFilter">Filter</button>
         </div>
 
         <div id="keuWrap" style="margin-top:10px"></div>
         <div id="keuRingkas" class="muted" style="margin-top:6px"></div>
       </div>
     </section>
-
   </div>
 </div>
 
 <script>
-/* =============== Utility =============== */
+"use strict";
+/* ===== Helpers ===== */
 const $ = id => document.getElementById(id);
 const fmt = n => "Rp"+(n||0).toLocaleString('id-ID');
 const todayISO = () => new Date().toISOString().split("T")[0];
 const toDMY = iso => { if(!iso) return ""; const [y,m,d]=iso.split("-"); return d+"/"+m+"/"+y; };
 const fromDMY = dmy => { const [d,m,y]=dmy.split("/"); return new Date(+y, +m-1, +d); };
 
-/* =============== Storage =============== */
+/* ===== State (LocalStorage) ===== */
 let barang = JSON.parse(localStorage.getItem("bsv_barang")) || [
   {nama:"Kerupuk Basah", hbeli:10000, harga:13000, stok:30}
 ];
-let trx   = JSON.parse(localStorage.getItem("bsv_trx")) || [];        // {tgl,jam,items,total,id}
-let keu   = JSON.parse(localStorage.getItem("bsv_keu")) || [];        // {id,tgl,jenis,ket,nominal}
+let trx   = JSON.parse(localStorage.getItem("bsv_trx")) || [];   // {id,tgl,jam,items,total}
+let keu   = JSON.parse(localStorage.getItem("bsv_keu")) || [];   // {id,tgl,jenis,ket,nominal}
 let cart = [];
 
 const saveBarang =()=>localStorage.setItem("bsv_barang", JSON.stringify(barang));
 const saveTrx    =()=>localStorage.setItem("bsv_trx", JSON.stringify(trx));
 const saveKeu    =()=>localStorage.setItem("bsv_keu", JSON.stringify(keu));
 
-/* =============== Auth =============== */
+/* ===== Auth ===== */
 function doLogin(){
-  const u=$("loginUser").value.trim().toLowerCase();
-  const p=$("loginPass").value.trim();
+  const u = $("loginUser").value.trim().toLowerCase();
+  const p = $("loginPass").value.trim();
   if(u==="admin" && p==="admin123"){
     $("loginView").classList.add("hidden");
     $("appView").classList.remove("hidden");
-    boot();
-    showTab('transaksi'); // tampilkan menu lengkap
+    boot(); showTab('transaksi');
   }else{
-    $("loginMsg").innerText="❌ Username atau password salah!";
+    $("loginMsg").innerText = "❌ Username atau password salah!";
   }
 }
 function doLogout(){
-  // kembali ke login (rapi)
   $("appView").classList.add("hidden");
   $("loginView").classList.remove("hidden");
-  $("loginUser").value=""; $("loginPass").value=""; $("loginMsg").innerText="";
+  $("loginUser").value = ""; $("loginPass").value = ""; $("loginMsg").innerText = "";
 }
 
-/* =============== Boot & Tabs =============== */
-function boot(){
-  $("trxDate").value = todayISO();
-  $("kDate").value   = todayISO();
-  loadBarangSelect(); renderCart(); renderStok(); renderLaporan(); renderKeuangan();
-}
+/* ===== Tabs ===== */
 function showTab(tab){
   ["transaksi","stok","laporan","keuangan"].forEach(t=>{
     $("sec-"+t).classList.add("hidden");
@@ -214,28 +203,35 @@ function showTab(tab){
   $("tab-"+tab).classList.add("active");
 }
 
-/* =============== Transaksi (POS) =============== */
+/* ===== Boot ===== */
+function boot(){
+  $("trxDate").value = todayISO();
+  $("kDate").value = todayISO();
+  loadBarangSelect(); renderCart(); renderStok(); renderLaporan(); renderKeuangan();
+}
+
+/* ===== Transaksi ===== */
 function loadBarangSelect(){
-  const sel=$("trxBarang");
-  sel.innerHTML="";
-  if(!barang.length){ sel.innerHTML="<option>(Belum ada barang)</option>"; return; }
+  const sel = $("trxBarang");
+  sel.innerHTML = "";
+  if(!barang.length){ sel.innerHTML = "<option>(Belum ada barang)</option>"; return; }
   barang.forEach((b,i)=>{
-    const op=document.createElement("option");
-    op.value=i; op.textContent=`${b.nama} — ${fmt(b.harga)} (Stok ${b.stok})`;
+    const op = document.createElement("option");
+    op.value = i; op.textContent = `${b.nama} — ${fmt(b.harga)} (Stok ${b.stok})`;
     sel.appendChild(op);
   });
 }
 function addToCart(){
-  const i=parseInt($("trxBarang").value||"0");
-  const qty=Math.max(1, parseInt($("trxQty").value||"1"));
-  const b=barang[i]; if(!b) return alert("Barang tidak valid"); 
-  if(b.stok<qty) return alert("Stok tidak cukup!");
+  const i = parseInt($("trxBarang").value||"0");
+  const qty = Math.max(1, parseInt($("trxQty").value||"1"));
+  const b = barang[i]; if(!b) return alert("Barang tidak valid");
+  if(b.stok < qty) return alert("Stok tidak cukup!");
   b.stok -= qty; saveBarang();
   cart.push({nama:b.nama, harga:b.harga||0, qty, total:(b.harga||0)*qty});
   renderCart(); loadBarangSelect(); renderStok();
 }
 function renderCart(){
-  const tb=$("cartBody"); tb.innerHTML=""; let sub=0;
+  const tb = $("cartBody"); tb.innerHTML = ""; let sub=0;
   cart.forEach((k,idx)=>{ sub+=k.total;
     tb.innerHTML += `<tr>
       <td>${k.nama}</td>
@@ -248,9 +244,9 @@ function renderCart(){
   $("cartTotal").innerText = fmt(sub);
 }
 function delItem(i){
-  const it=cart[i];
-  const b=barang.find(x=>x.nama===it.nama);
-  if(b) b.stok+=it.qty;
+  const it = cart[i];
+  const b = barang.find(x=>x.nama===it.nama);
+  if(b) b.stok += it.qty;
   cart.splice(i,1); saveBarang(); renderCart(); loadBarangSelect(); renderStok();
 }
 function clearCart(){
@@ -264,17 +260,13 @@ function saveTransaction(){
   const jam = new Date().toLocaleTimeString("id-ID");
   const total = cart.reduce((a,b)=>a+b.total,0);
   const id = Date.now();
-  trx.push({id,tgl,jam,items:cart,total});
-  saveTrx();
+  trx.push({id,tgl,jam,items:cart,total}); saveTrx();
 
-  // ==== CETAK NOTA (POPUP PRINT) ====
+  // Cetak Nota (popup)
   const rows = cart.map(i=>`${i.nama} x${i.qty} @${fmt(i.harga)} = ${fmt(i.total)}`).join("\\n");
   const notaHTML = `
     <html><head><title>Nota</title>
-      <style>
-        body{font-family:monospace;padding:10px}
-        .c{text-align:center}.l{border-top:1px dashed #000;margin:6px 0}
-      </style>
+      <style>body{font-family:monospace;padding:10px}.c{text-align:center}.l{border-top:1px dashed #000;margin:6px 0}</style>
     </head><body>
       <div class="c"><b>PT. BSV Marcela Groups</b><br/>Kasir Online</div>
       <div class="l"></div>
@@ -291,24 +283,22 @@ function saveTransaction(){
   const w = window.open("","nota","width=380,height=600");
   w.document.write(notaHTML); w.document.close();
 
-  // ==== DOWNLOAD NOTA (TXT) ====
+  // Download Nota (txt)
   const txt = `PT. BSV Marcela Groups\\nTanggal: ${tgl} ${jam}\\nID: ${id}\\n----------------------\\n`+
               cart.map(i=>`${i.nama} x${i.qty} @${i.harga} = ${i.total}`).join("\\n")+
               `\\n----------------------\\nTOTAL: ${total}\\nTerima kasih`;
   const blob = new Blob([txt], {type:"text/plain"});
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `Nota_${id}.txt`;
-  document.body.appendChild(a); a.click(); a.remove();
+  a.href = URL.createObjectURL(blob); a.download = `Nota_${id}.txt`; document.body.appendChild(a); a.click(); a.remove();
 
   cart=[]; renderCart(); $("trxQty").value=1; loadBarangSelect(); renderStok(); renderLaporan();
   alert("✅ Transaksi disimpan. Nota dicetak & diunduh.");
 }
 
-/* =============== Stok =============== */
+/* ===== Stok ===== */
 function renderStok(){
   const box=$("stokTable");
-  if(!barang.length){ box.innerHTML="<p>Belum ada barang.</p>"; return;}
+  if(!barang.length){ box.innerHTML="<p>Belum ada barang.</p>"; return; }
   let html = `<table>
     <thead><tr><th>Nama</th><th class="right">Harga Beli</th><th class="right">Harga Jual</th><th class="center">Stok</th><th class="center">Aksi</th></tr></thead><tbody>`;
   barang.forEach((b,i)=>{
@@ -351,11 +341,10 @@ function stokHapus(i){
   barang.splice(i,1); saveBarang(); loadBarangSelect(); renderStok();
 }
 
-/* =============== Laporan =============== */
+/* ===== Laporan ===== */
 function renderLaporan(data = trx){
   const box=$("laporanWrap"), sum=$("laporanRingkas");
   if(!data.length){ box.innerHTML="<p>Belum ada transaksi.</p>"; sum.innerHTML=""; return; }
-  // rekap harian
   const map={}; data.forEach(r=>{ if(!map[r.tgl]) map[r.tgl]={total:0,count:0}; map[r.tgl].total+=r.total; map[r.tgl].count++; });
   const dates=Object.keys(map).sort((a,b)=> fromDMY(b)-fromDMY(a) );
   let html = `<table><thead><tr><th>Tanggal</th><th class="right">Total</th><th class="center">Transaksi</th><th class="center">Aksi</th></tr></thead><tbody>`;
@@ -376,9 +365,7 @@ function filterLaporan(){
   const d = $("lapDate").value; const m=$("lapMonth").value;
   let data = trx;
   if(d){ const t = toDMY(d); data = data.filter(x=>x.tgl===t); }
-  else if(m){
-    const [yy,mm]=m.split("-"); data = data.filter(x=>{const [,M,Y]=x.tgl.split("/"); return Y===yy && M===mm;});
-  }
+  else if(m){ const [yy,mm]=m.split("-"); data = data.filter(x=>{const [,M,Y]=x.tgl.split("/"); return Y===yy && M===mm;}); }
   renderLaporan(data);
 }
 function lapHapusTanggal(tgl){
@@ -386,7 +373,7 @@ function lapHapusTanggal(tgl){
   trx = trx.filter(x=>x.tgl!==tgl); saveTrx(); renderLaporan();
 }
 
-/* =============== Keuangan =============== */
+/* ===== Keuangan ===== */
 function renderKeuangan(data = keu){
   const box=$("keuWrap"), sum=$("keuRingkas");
   if(!data.length){ box.innerHTML="<p>Belum ada data keuangan.</p>"; sum.innerHTML=""; return; }
@@ -432,6 +419,38 @@ function keuHapus(id){
   if(!confirm("Hapus data ini?")) return;
   keu = keu.filter(x=>x.id!==id); saveKeu(); renderKeuangan();
 }
+
+/* ===== Events Binding (satu pintu, biar anti-nyangkut) ===== */
+document.addEventListener("DOMContentLoaded", ()=>{
+  // login/logout
+  $("btnLogin").addEventListener("click", doLogin);
+  $("btnLogout").addEventListener("click", doLogout);
+
+  // nav tabs (delegation)
+  $("navTabs").addEventListener("click", (e)=>{
+    const btn = e.target.closest("button[data-tab]");
+    if(!btn) return;
+    showTab(btn.dataset.tab);
+  });
+
+  // transaksi
+  $("btnAddCart").addEventListener("click", addToCart);
+  $("btnClearCart").addEventListener("click", clearCart);
+  $("btnSaveTransaction").addEventListener("click", saveTransaction);
+
+  // stok
+  $("btnAddBarang").addEventListener("click", stokTambah);
+
+  // laporan
+  $("btnLapAll").addEventListener("click", ()=>renderLaporan());
+  $("btnLapFilter").addEventListener("click", filterLaporan);
+
+  // keuangan
+  $("btnKeuTambah").addEventListener("click", keuTambah);
+  $("btnKeuAll").addEventListener("click", ()=>renderKeuangan());
+  $("btnKeuReset").addEventListener("click", ()=>renderKeuangan());
+  $("btnKeuFilter").addEventListener("click", keuFilter);
+});
 </script>
 </body>
 </html>
