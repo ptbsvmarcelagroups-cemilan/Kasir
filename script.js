@@ -1,280 +1,279 @@
-// ===== LOGIN LOGIC =====
-function login() {
-  const user = document.getElementById('username').value;
-  const pass = document.getElementById('password').value;
-  if (user === "admin" && pass === "admin123") {
-    window.location.href = "dashboard.html";
-  } else {
-    document.getElementById('error').innerText = "❌ Username atau password salah!";
-  }
-}
+// Utility Function
+const formatRupiah = (n) => "Rp" + new Intl.NumberFormat('id-ID').format(n || 0);
+const toDMY = (iso) => {
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+};
+const todayISO = () => new Date().toISOString().split("T")[0];
 
+// LocalStorage Data
+let barang = JSON.parse(localStorage.getItem("bsv_barang")) || [];
+let transaksi = JSON.parse(localStorage.getItem("bsv_transaksi")) || [];
+let keuangan = JSON.parse(localStorage.getItem("bsv_keuangan")) || [];
+let keranjang = [];
+
+// Simpan Data
+const saveBarang = () => localStorage.setItem("bsv_barang", JSON.stringify(barang));
+const saveTransaksi = () => localStorage.setItem("bsv_transaksi", JSON.stringify(transaksi));
+const saveKeuangan = () => localStorage.setItem("bsv_keuangan", JSON.stringify(keuangan));
+
+// Logout
 function logout() {
   window.location.href = "index.html";
 }
 
-// ===== PAGE NAVIGATION =====
+// Navigasi Page
 function showPage(page) {
-  document.getElementById("content").innerHTML = "<p>Loading...</p>";
+  document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
+  document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+  document.getElementById(`page-${page}`).style.display = "block";
+  document.getElementById(`btn-${page}`).classList.add("active");
 
-  document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
-  document.getElementById(`btn-${page}`).classList.add('active');
-
-  if (page === "transaksi") {
-    loadTransaksi();
-  } else if (page === "stok") {
-    loadStok();
-  } else if (page === "laporan") {
-    loadLaporan();
-  } else if (page === "keuangan") {
-    loadKeuangan();
-  }
+  if (page == "transaksi") renderBarang();
+  if (page == "stok") renderStok();
+  if (page == "laporan") showLaporan();
+  if (page == "keuangan") renderKeuangan();
 }
 
-// ===== HALAMAN TRANSAKSI (AKAN DIISI BERIKUTNYA) =====
-function loadTransaksi() {
-  document.getElementById("content").innerHTML = `
-    <h2>🛒 Transaksi Penjualan</h2>
-    <p>(Dalam proses... akan tampil tabel & input barang)</p>
-  `;
+// ========== 1. TRANSAKSI ==========
+function renderBarang() {
+  const select = document.getElementById("transaksiBarang");
+  select.innerHTML = barang.length
+    ? barang.map((b, i) => `<option value="${i}">${b.nama} - ${formatRupiah(b.harga)} (Stok ${b.stok})</option>`).join("")
+    : `<option>(Belum ada barang)</option>`;
 }
 
-// ===== HALAMAN STOK =====
-function loadStok() {
-  document.getElementById("content").innerHTML = `
-    <h2>📦 Manajemen Stok Barang</h2>
-    <p>(Akan ditampilkan tabel stok & tambah barang)</p>
-  `;
-}
+function addToCart() {
+  const idx = document.getElementById("transaksiBarang").value;
+  const qty = parseInt(document.getElementById("transaksiQty").value);
 
-// ===== HALAMAN LAPORAN =====
-function loadLaporan() {
-  document.getElementById("content").innerHTML = `
-    <h2>📈 Laporan Penjualan</h2>
-    <p>(Tabel laporan harian/bulanan akan muncul di sini)</p>
-  `;
-}
+  if (!barang[idx] || qty <= 0) return alert("Barang/Qty tidak valid!");
+  if (barang[idx].stok < qty) return alert("Stok tidak cukup!");
 
-// ===== HALAMAN KEUANGAN =====
-function loadKeuangan() {
-  document.getElementById("content").innerHTML = `
-    <h2>💸 Pemasukan & Pengeluaran</h2>
-    <p>(Input keuangan + laporan saldo akan ditampilkan di sini)</p>
-  `;
-}
-// ============================
-// 1. DATA BARANG & KERANJANG
-// ============================
-let barangList = JSON.parse(localStorage.getItem("bsv_barang")) || [
-  { nama: "Kerupuk Basah", harga: 13000, stok: 50 },
-  { nama: "Es Teh", harga: 5000, stok: 20 }
-];
-let keranjang = [];
-
-function saveBarang() {
-  localStorage.setItem("bsv_barang", JSON.stringify(barangList));
-}
-
-// ============================
-// 2. LOAD HALAMAN TRANSAKSI
-// ============================
-function loadTransaksi() {
-  document.getElementById("content").innerHTML = `
-    <h2>🛒 Transaksi Penjualan</h2>
-    <label>Pilih Barang:</label>
-    <select id="barangSelect"></select>
-    <label>Qty:</label>
-    <input type="number" id="qty" value="1" min="1">
-    <button onclick="tambahKeranjang()" class="btn">Tambah</button>
-
-    <h3>🧾 Keranjang:</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Barang</th><th>Qty</th><th>Harga</th><th>Total</th><th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody id="keranjangTable"></tbody>
-    </table>
-    <h3>Total: <span id="totalTransaksi">Rp0</span></h3>
-    <button onclick="simpanTransaksi()" class="btn-primary">Simpan Transaksi</button>
-  `;
-
-  // Isi dropdown barang
-  let select = document.getElementById("barangSelect");
-  select.innerHTML = "";
-  barangList.forEach((b, i) => {
-    select.innerHTML += `<option value="${i}">${b.nama} - Rp${b.harga} (Stok: ${b.stok})</option>`;
-  });
-
-  renderKeranjang();
-}
-
-// ============================
-// 3. TAMBAH BARANG KE KERANJANG
-// ============================
-function tambahKeranjang() {
-  let index = document.getElementById("barangSelect").value;
-  let qty = parseInt(document.getElementById("qty").value);
-
-  if (!barangList[index] || qty <= 0) return alert("Barang/qty tidak valid");
-  if (barangList[index].stok < qty) return alert("Stok tidak cukup!");
-
+  barang[idx].stok -= qty;
   keranjang.push({
-    nama: barangList[index].nama,
-    harga: barangList[index].harga,
-    qty: qty,
-    total: barangList[index].harga * qty
+    nama: barang[idx].nama,
+    harga: barang[idx].harga,
+    qty,
+    total: barang[idx].harga * qty
   });
 
-  barangList[index].stok -= qty;
   saveBarang();
   renderKeranjang();
 }
 
-// ============================
-// 4. RENDER KERANJANG
-// ============================
 function renderKeranjang() {
-  let tbody = document.getElementById("keranjangTable");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
+  const tbody = document.getElementById("cartTable");
   let total = 0;
-  keranjang.forEach((item, i) => {
-    total += item.total;
-    tbody.innerHTML += `
+  tbody.innerHTML = keranjang.map((k, i) => {
+    total += k.total;
+    return `
       <tr>
-        <td>${item.nama}</td>
-        <td>${item.qty}</td>
-        <td>Rp${item.harga}</td>
-        <td>Rp${item.total}</td>
-        <td><button onclick="hapusItem(${i})" class="btn-danger">Hapus</button></td>
+        <td>${k.nama}</td>
+        <td>${k.qty}</td>
+        <td class="right">${formatRupiah(k.harga)}</td>
+        <td class="right">${formatRupiah(k.total)}</td>
+        <td><button class="btn-danger" onclick="hapusItem(${i})">x</button></td>
       </tr>
     `;
-  });
-
-  document.getElementById("totalTransaksi").innerText = "Rp" + total.toLocaleString();
+  }).join("");
+  document.getElementById("cartTotal").innerText = formatRupiah(total);
 }
 
-// ============================
-// 5. HAPUS ITEM DI KERANJANG
-// ============================
 function hapusItem(i) {
+  const item = keranjang[i];
+  const b = barang.find(b => b.nama === item.nama);
+  if (b) b.stok += item.qty;
   keranjang.splice(i, 1);
+  saveBarang();
   renderKeranjang();
 }
 
-// ============================
-// 6. SIMPAN TRANSAKSI
-// ============================
-function simpanTransaksi() {
-  if (keranjang.length === 0) return alert("Keranjang kosong!");
+function saveTransaction() {
+  if (!keranjang.length) return alert("Keranjang kosong!");
+  const iso = document.getElementById("transaksiTanggal").value || todayISO();
+  const tgl = toDMY(iso);
+  const jam = new Date().toLocaleTimeString("id-ID");
+  const total = keranjang.reduce((a, b) => a + b.total, 0);
 
-  let transaksiLama = JSON.parse(localStorage.getItem("bsv_transaksi")) || [];
-  transaksiLama.push({
-    tanggal: new Date().toLocaleString(),
-    items: keranjang,
-    total: keranjang.reduce((sum, item) => sum + item.total, 0)
-  });
-
-  localStorage.setItem("bsv_transaksi", JSON.stringify(transaksiLama));
+  transaksi.push({ tgl, jam, total });
+  saveTransaksi();
   keranjang = [];
   renderKeranjang();
-  alert("✅ Transaksi berhasil disimpan!");
+  alert("✅ Transaksi tersimpan!");
 }
-// ============================
-// 7. STOK BARANG
-// ============================
-function loadStok() {
-  let html = `
-    <h2>📦 Manajemen Stok Barang</h2>
-    <button onclick="formTambahBarang()" class="btn-primary">+ Tambah Barang</button>
-    <table>
+
+// ========== 2. STOK BARANG ==========
+function renderStok() {
+  const div = document.getElementById("stokTable");
+  if (!barang.length) return div.innerHTML = "<p>Belum ada barang</p>";
+
+  div.innerHTML = `
+    <table class="table">
       <thead>
-        <tr>
-          <th>Nama Barang</th>
-          <th>Harga</th>
-          <th>Stok</th>
-          <th>Aksi</th>
-        </tr>
+        <tr><th>Nama</th><th>Beli</th><th>Jual</th><th>Stok</th><th>Aksi</th></tr>
       </thead>
-      <tbody id="stokTable"></tbody>
+      <tbody>
+        ${barang.map((b, i) => `
+          <tr>
+            <td>${b.nama}</td>
+            <td>${formatRupiah(b.hbeli || 0)}</td>
+            <td>${formatRupiah(b.harga)}</td>
+            <td>${b.stok}</td>
+            <td>
+              <button onclick="editBarang(${i})">✏</button>
+              <button class="btn-danger" onclick="hapusBarang(${i})">🗑</button>
+            </td>
+          </tr>`).join("")}
+      </tbody>
     </table>
   `;
-  document.getElementById("content").innerHTML = html;
+}
+
+function addBarang() {
+  const nama = document.getElementById("stokNama").value;
+  const hbeli = parseInt(document.getElementById("stokBeli").value);
+  const harga = parseInt(document.getElementById("stokJual").value);
+  const stok = parseInt(document.getElementById("stokQty").value);
+
+  if (!nama) return alert("Nama barang wajib!");
+
+  barang.push({ nama, hbeli: hbeli || 0, harga: harga || 0, stok: stok || 0 });
+  saveBarang();
   renderStok();
 }
 
-function renderStok() {
-  let tbody = document.getElementById("stokTable");
-  tbody.innerHTML = "";
+function editBarang(i) {
+  const b = barang[i];
+  const nama = prompt("Nama:", b.nama);
+  const hb = parseInt(prompt("Harga Beli:", b.hbeli));
+  const hj = parseInt(prompt("Harga Jual:", b.harga));
+  const st = parseInt(prompt("Stok:", b.stok));
 
-  barangList.forEach((b, i) => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${b.nama}</td>
-        <td>Rp${b.harga.toLocaleString()}</td>
-        <td>${b.stok}</td>
-        <td>
-          <button onclick="editBarang(${i})">✏ Edit</button>
-          <button class="btn-danger" onclick="hapusBarang(${i})">🗑 Hapus</button>
-        </td>
-      </tr>
-    `;
+  barang[i] = {
+    nama: nama || b.nama,
+    hbeli: isNaN(hb) ? b.hbeli : hb,
+    harga: isNaN(hj) ? b.harga : hj,
+    stok: isNaN(st) ? b.stok : st
+  };
+
+  saveBarang();
+  renderStok();
+}
+
+function hapusBarang(i) {
+  if (confirm("Yakin hapus barang?")) {
+    barang.splice(i, 1);
+    saveBarang();
+    renderStok();
+  }
+}
+
+// ========== 3. LAPORAN ==========
+function showLaporan(data = transaksi) {
+  const div = document.getElementById("laporanTable");
+  if (!data.length) return div.innerHTML = "<p>Belum ada laporan</p>";
+
+  let map = {};
+  data.forEach(r => {
+    if (!map[r.tgl]) map[r.tgl] = 0;
+    map[r.tgl] += r.total;
   });
-  saveBarang();
+
+  let html = `<table class="table">
+    <thead><tr><th>Tanggal</th><th>Total</th></tr></thead>
+    <tbody>`;
+  for (const t in map) {
+    html += `<tr><td>${t}</td><td class="right">${formatRupiah(map[t])}</td></tr>`;
+  }
+  html += "</tbody></table>";
+
+  div.innerHTML = html;
 }
 
-function formTambahBarang() {
-  document.getElementById("content").innerHTML = `
-    <h2>➕ Tambah Barang Baru</h2>
-    <input type="text" id="namaBarang" placeholder="Nama Barang">
-    <input type="number" id="hargaBarang" placeholder="Harga (Rp)">
-    <input type="number" id="stokBarang" placeholder="Stok">
-    <button onclick="tambahBarangBaru()" class="btn-primary">Simpan</button>
-    <button onclick="showPage('stok')" class="btn">Batal</button>
+function filterLaporan() {
+  const t = document.getElementById("filterTanggal").value;
+  if (!t) return showLaporan();
+  showLaporan(transaksi.filter(x => x.tgl === toDMY(t)));
+}
+
+// ========== 4. Pemasukan & Pengeluaran ==========
+function addKeuangan() {
+  const iso = document.getElementById("keuTanggal").value || todayISO();
+  const tgl = toDMY(iso);
+  const jenis = document.getElementById("keuJenis").value;
+  const ket = document.getElementById("keuKeterangan").value;
+  const nominal = parseInt(document.getElementById("keuNominal").value);
+
+  if (!nominal) return alert("Nominal wajib diisi!");
+
+  keuangan.push({ tgl, jenis, ket, nominal, id: Date.now() });
+  saveKeuangan();
+  renderKeuangan();
+}
+
+function renderKeuangan(data = keuangan) {
+  const div = document.getElementById("keuanganTable");
+  if (!data.length) return div.innerHTML = "<p>Belum ada data keuangan</p>";
+
+  let pemasukan = 0, pengeluaran = 0;
+  let html = `
+    <table class="table">
+      <thead>
+        <tr><th>Tanggal</th><th>Keterangan</th><th>Jenis</th><th>Jumlah</th><th>Aksi</th></tr>
+      </thead>
+      <tbody>
   `;
+  data.forEach(e => {
+    if (e.jenis === "pemasukan") pemasukan += e.nominal;
+    if (e.jenis === "pengeluaran") pengeluaran += e.nominal;
+    html += `
+      <tr>
+        <td>${e.tgl}</td>
+        <td>${e.ket}</td>
+        <td>${e.jenis}</td>
+        <td class="right">${formatRupiah(e.nominal)}</td>
+        <td>
+          <button onclick="editKeuangan(${e.id})">✏</button>
+          <button class="btn-danger" onclick="hapusKeuangan(${e.id})">🗑</button>
+        </td>
+      </tr>`;
+  });
+  html += "</tbody></table>";
+
+  div.innerHTML = html;
+  document.getElementById("keuanganSummary").innerHTML =
+    `Total Masuk: <b>${formatRupiah(pemasukan)}</b> • Total Keluar: <b>${formatRupiah(pengeluaran)}</b> • Saldo: <b>${formatRupiah(pemasukan - pengeluaran)}</b>`;
 }
 
-function tambahBarangBaru() {
-  const nama = document.getElementById("namaBarang").value.trim();
-  const harga = parseInt(document.getElementById("hargaBarang").value);
-  const stok = parseInt(document.getElementById("stokBarang").value);
-
-  if (!nama || isNaN(harga) || isNaN(stok)) {
-    alert("Isi semua data dengan benar!");
-    return;
-  }
-
-  barangList.push({ nama, harga, stok });
-  saveBarang();
-  alert("✅ Barang berhasil ditambahkan!");
-  showPage('stok');
+function filterKeuangan() {
+  const t = document.getElementById("keuFilterTanggal").value;
+  if (!t) return renderKeuangan();
+  renderKeuangan(keuangan.filter(x => x.tgl === toDMY(t)));
 }
 
-function editBarang(index) {
-  const b = barangList[index];
-  const nama = prompt("Nama Barang:", b.nama);
-  const harga = prompt("Harga Barang:", b.harga);
-  const stok = prompt("Stok Barang:", b.stok);
+function editKeuangan(id) {
+  const e = keuangan.find(x => x.id === id);
+  if (!e) return;
 
-  if (nama !== null && harga !== null && stok !== null) {
-    barangList[index] = {
-      nama: nama,
-      harga: parseInt(harga),
-      stok: parseInt(stok)
-    };
-    saveBarang();
-    renderStok();
-    alert("✅ Barang berhasil diupdate!");
-  }
+  const tgl = prompt("Tanggal dd/mm/yyyy:", e.tgl);
+  const ket = prompt("Keterangan:", e.ket);
+  const jenis = prompt("Jenis (pemasukan/pengeluaran):", e.jenis);
+  const nominal = parseInt(prompt("Nominal:", e.nominal));
+
+  if (tgl) e.tgl = tgl;
+  if (ket) e.ket = ket;
+  if (jenis) e.jenis = jenis;
+  if (!isNaN(nominal)) e.nominal = nominal;
+
+  saveKeuangan();
+  renderKeuangan();
 }
 
-function hapusBarang(index) {
-  if (confirm("Hapus barang ini?")) {
-    barangList.splice(index, 1);
-    saveBarang();
-    renderStok();
+function hapusKeuangan(id) {
+  if (confirm("Hapus data ini?")) {
+    keuangan = keuangan.filter(x => x.id !== id);
+    saveKeuangan();
+    renderKeuangan();
   }
 }
